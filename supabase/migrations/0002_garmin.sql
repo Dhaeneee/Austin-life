@@ -33,14 +33,8 @@ create policy gd_select on public.garmin_data for select to authenticated
 create policy gd_delete on public.garmin_data for delete to authenticated
   using (user_id = auth.uid());
 
-create or replace function public.garmin_status()
-returns table(linked boolean, since timestamptz)
-language sql stable security definer set search_path = public as $$
-  select exists(select 1 from public.garmin_links where user_id = auth.uid()),
-         (select created_at from public.garmin_links where user_id = auth.uid())
-$$;
-revoke all on function public.garmin_status() from public, anon;
-grant execute on function public.garmin_status() to authenticated;
+-- garmin_status() wordt in 0004 aangemaakt
+
 
 revoke all on public.garmin_links, public.garmin_pkce, public.garmin_data from anon, authenticated;
 grant select, delete on public.garmin_data to authenticated;
