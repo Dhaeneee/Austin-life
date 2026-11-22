@@ -154,23 +154,25 @@ const sportVanAct = (s) => GTYPE[String(s?.activityType || "").toUpperCase()] ||
 const sportVanPlan = (p) => p?.k === "rust" ? "rust" : (SPORT[p?.sp] ? p.sp : ({ run: "lopen", bike: "fietsen", swim: "zwemmen", kracht: "kracht" }[p?.k] || "andere"));
 
 /* ================= gegevens ================= */
-let S = { user: null, prof: null, plan: {}, note: {}, acts: [], gez: [], ana: {}, bel: null, kop: null, aiFout: null, geladen: false };
+let S = { user: null, prof: null, plan: {}, note: {}, acts: [], gez: [], ana: {}, bel: null, kop: null, saxo: null, stand: null, saxoMelding: null, aiFout: null, geladen: false };
 async function laad() {
   const uid = S.user.id, van = plusDag(vandaag(), -60);
-  const [prof, plan, gd, an, bel, kop] = await Promise.all([
+  const [prof, plan, gd, an, bel, kop, sx, st] = await Promise.all([
     sb.from("profiles").select("naam").eq("id", uid).maybeSingle(),
     sb.from("plans").select("cplan,cnote").eq("athlete_id", uid).maybeSingle(),
     sb.from("garmin_data").select("kind,ref,day,data,received_at").eq("user_id", uid).gte("day", van).order("day", { ascending: false }).limit(1000),
     sb.from("analyse").select("ref,tekst,created_at").eq("user_id", uid),
     sb.from("belegger").select("antwoorden,profiel,updated_at").eq("user_id", uid).maybeSingle(),
     sb.rpc("koppelingen"),
+    sb.rpc("saxo_status"),
+    sb.from("saxo_stand").select("env,data,opgehaald").eq("user_id", uid).maybeSingle(),
   ]);
   S.prof = prof.data || {}; S.plan = plan.data?.cplan || {}; S.note = plan.data?.cnote || {};
   const rows = gd.data || [];
   S.acts = rows.filter((r) => r.kind === "activity").sort((a, b) => (b.data?.summary?.startTimeInSeconds || 0) - (a.data?.summary?.startTimeInSeconds || 0));
   S.gez = rows.filter((r) => r.kind !== "activity");
   S.ana = Object.fromEntries((an.data || []).map((r) => [r.ref, r]));
-  S.bel = bel.data || null; S.kop = kop.data || null; S.geladen = true;
+  S.bel = bel.data || null; S.kop = kop.data || null; S.saxo = sx.data || null; S.stand = st.data || null; S.geladen = true;
 }
 // gezondheid per dag
 function gezDag(dag) {
@@ -196,6 +198,9 @@ function waarschuwingen() {
   else if (!k.legati_ok || Date.now() - new Date(k.legati_ok).getTime() > 2 * 3600e3) w.push("De koppeling met Legati is gestopt: laatste keer gelukt " + sinds(k.legati_ok) + ".");
   const lg = S.gez.reduce((m, r) => (r.day > m ? r.day : m), "");
   if (k.legati_ok && lg && lg < plusDag(vandaag(), -2)) w.push("Er komen geen nieuwe Garmin-gegevens meer binnen sinds " + langeDatum(lg) + ". Kijk of je horloge nog synchroniseert met Garmin Connect en of Garmin nog gekoppeld is in de Legati-app.");
+  const x = S.saxo;
+  if (x && x.env && x.last_error && !x.gekoppeld) w.push("De koppeling met Saxo is gestopt. Koppel opnieuw bij Beleggen.");
+  else if (x && x.gekoppeld && x.last_ok && Date.now() - new Date(x.last_ok).getTime() > 2 * 3600e3) w.push("Saxo gaf geen nieuwe gegevens meer sinds " + sinds(x.last_ok) + ".");
   return w;
 }
 const alerts = () => waarschuwingen().map((t) => '<div class="alert a-warn"><span>⚠️</span><span>' + t + "</span></div>").join("");
@@ -285,7 +290,7 @@ function schermHome() {
   }
   // agenda + beleggen kort
   h += '<div class="card"><div class="ch"><h2>Agenda</h2><a href="#agenda">Openen</a></div><p class="empty">Je iCloud- en Gmail-agenda zijn nog niet gekoppeld.</p></div>';
-  h += '<div class="card"><div class="ch"><h2>Beleggen</h2><a href="#beleggen">Openen</a></div><p class="empty">' + (S.bel?.profiel ? "Je beleggersprofiel: <b style=\"color:var(--ink)\">" + esc(S.bel.profiel) + "</b>. " : "") + "Saxo Bank is nog niet gekoppeld, dus hier staan nog geen koersen of posities.</p></div>";
+  h += '<div class="card"><div class="ch"><h2>Beleggen</h2><a href="#beleggen">Openen</a></div><p class="empty">' + (S.bel?.profiel ? "Je beleggersprofiel: <b style=\"color:var(--ink)\">" + esc(S.bel.profiel) + "</b>. " : "") + (S.stand?.data?.totaal != null ? "Saxo: <b style=\"color:var(--ink)\">" + bedrag(S.stand.data.totaal, S.stand.data.munt) + "</b> (" + esc(sinds(S.stand.opgehaald)) + ")." : "Saxo Bank is nog niet gekoppeld, dus hier staan nog geen koersen of posities.") + "</p></div>";
   return h;
 }
 
@@ -351,8 +356,8 @@ function schermTraining(ref) {
 function schermBeleggen() {
   const week = 25, maand = 90, jaar = week * 52 + maand * 12;
   let h = kop("Beleggen", "Alleen lezen. De app plaatst nooit orders.");
-  h += '<div class="card"><div class="ch"><h2>Saxo Bank</h2><span class="tag t-g">Niet gekoppeld</span></div><p class="empty">Na het koppelen zie je hier je posities, je cash en je rendement, rechtstreeks uit je Saxo-rekening en alleen lezen. Je wachtwoord komt nooit in deze app: je logt in bij Saxo zelf. Tot dan staan hier geen koersen, want de app toont nooit verzonnen cijfers.</p></div>';
-  h += '<div class="card"><div class="ch"><h2>Je inlegplan</h2></div><div class="row"><span>Elke week</span><b>' + euro(week) + '</b></div><div class="row"><span>Elke maand extra</span><b>' + euro(maand) + '</b></div><div class="row"><span>Per maand gemiddeld</span><b>' + euro(jaar / 12) + '</b></div><div class="row"><span>Per jaar</span><b>' + euro(jaar) + '</b></div><p class="src">Berekend uit je vaste bedragen, zonder rendement. Rendement en kosten komen pas als Saxo gekoppeld is.</p></div>';
+  h += alerts() + saxoKaart();
+  h += '<div class="card"><div class="ch"><h2>Je inlegplan</h2></div><div class="row"><span>Elke week</span><b>' + euro(week) + '</b></div><div class="row"><span>Elke maand extra</span><b>' + euro(maand) + '</b></div><div class="row"><span>Per maand gemiddeld</span><b>' + euro(jaar / 12) + '</b></div><div class="row"><span>Per jaar</span><b>' + euro(jaar) + '</b></div><p class="src">Berekend uit je vaste bedragen, zonder rendement.' + (S.saxo?.gekoppeld ? '' : ' Rendement en kosten komen pas als Saxo gekoppeld is.') + '</p></div>';
   const b = S.bel;
   h += '<div class="card"><div class="ch"><h2>Beleggersprofiel</h2>' + (b?.profiel ? '<span class="sm mut">' + esc(sinds(b.updated_at)) + "</span>" : "") + "</div>" +
     (b?.profiel ? '<div class="big" style="text-transform:capitalize">' + esc(b.profiel) + "</div>" + (b.antwoorden?._uitleg ? '<p class="sm mut" style="margin-top:6px">' + esc(b.antwoorden._uitleg) + "</p>" : "") + '<button class="btn btn2" data-go="#vragenlijst">Vragenlijst opnieuw doen</button>'
@@ -362,6 +367,32 @@ function schermBeleggen() {
   return h;
 }
 
+const SAXOFOUT = { niet_ingesteld: "Saxo is nog niet ingesteld: de App Key of de App Secret ontbreekt.", verlopen: "Je Saxo-aanmelding is verlopen. Koppel opnieuw.", net: "Geen verbinding." };
+const bedrag = (x, m) => x == null ? "–" : Number(x).toLocaleString("nl-BE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (m ? " " + m : "");
+function saxoKaart() {
+  const x = S.saxo || {}, st = S.stand, d = st?.data, melding = S.saxoMelding ? '<div class="alert ' + (S.saxoMelding.ok ? "a-ok" : "a-warn") + '"><span>' + esc(S.saxoMelding.t) + "</span></div>" : "";
+  if (!x.gekoppeld) {
+    const kan = x.app_sim || x.app_live;
+    return '<div class="card"><div class="ch"><h2>Saxo Bank</h2><span class="tag t-g">Niet gekoppeld</span></div>' + melding +
+      '<p class="empty">Na het koppelen zie je hier je posities, je cash en je rendement, rechtstreeks uit je Saxo-rekening en alleen lezen. Je logt in op de pagina van Saxo zelf: je wachtwoord komt nooit in deze app. Tot dan staan hier geen koersen, want de app toont nooit verzonnen cijfers.</p>' +
+      (x.app_sim ? '<button class="btn" data-act="saxo-sim">Koppel Saxo (testomgeving)</button>' : "") +
+      (x.app_live ? '<button class="btn' + (x.app_sim ? " btn2" : "") + '" data-act="saxo-live">Koppel Saxo (echte rekening)</button>' : "") +
+      (kan ? "" : '<p class="src">Eerst moet je app bij Saxo geregistreerd zijn (App Key en App Secret).</p>') + '<p class="msg" id="saxoMsg"></p></div>';
+  }
+  let h = '<div class="card"><div class="ch"><h2>Saxo Bank</h2><span class="tag ' + (x.env === "live" ? "t-a" : "t-g") + '">' + (x.env === "live" ? "Echte rekening" : "Testomgeving") + "</span></div>" + melding;
+  if (!d) h += '<p class="empty">Gekoppeld. De eerste gegevens worden opgehaald.</p>';
+  else {
+    h += '<div class="sm mut">Totale waarde</div><div class="big">' + bedrag(d.totaal, d.munt) + "</div>" +
+      '<div class="grid" style="margin-top:12px"><div class="met"><div class="l">Cash</div><div class="v" style="font-size:18px">' + bedrag(d.cash, d.munt) + '</div></div><div class="met"><div class="l">In posities</div><div class="v" style="font-size:18px">' + bedrag(d.posities_waarde, d.munt) + "</div></div></div>";
+    const pos = d.posities || [];
+    h += '<div style="margin-top:14px">' + (pos.length ? pos.map((p) => '<div class="row"><span style="color:var(--ink);min-width:0"><b style="display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left">' + esc(p.naam) + '</b><span class="sm mut">' +
+      esc([p.aantal != null ? getal(p.aantal, p.aantal % 1 ? 2 : 0) + " stuks" : "", p.koers != null ? "koers " + bedrag(p.koers, p.munt) : ""].filter(Boolean).join(" · ")) + "</span></span><b style='white-space:nowrap;flex:none'>" + bedrag(p.waarde, d.munt) +
+      (p.winst != null ? '<span class="sm" style="display:block;font-weight:500;color:' + (p.winst >= 0 ? "var(--acc)" : "var(--warn)") + '">' + (p.winst >= 0 ? "+" : "") + bedrag(p.winst) + "</span>" : "") + "</b></div>").join("") : '<p class="empty">Geen posities.</p>') + "</div>";
+    h += '<p class="src">Uit Saxo, opgehaald ' + esc(sinds(st.opgehaald)) + ". Koersen kunnen vertraagd zijn. Elk kwartier vernieuwd." + (x.env !== "live" ? " Dit is de testomgeving met nepgeld." : "") + "</p>";
+  }
+  h += '<div class="grid" style="margin-top:4px"><button class="btn btn2" data-act="saxo-nu">Nu vernieuwen</button><button class="btn btn2" data-act="saxo-stop">Ontkoppelen</button></div><p class="msg" id="saxoMsg"></p></div>';
+  return h;
+}
 const VRAGEN = [
   { k: "horizon", q: "Hoe lang wil je dit geld laten staan?", o: ["Minder dan 3 jaar", "3 tot 5 jaar", "5 tot 10 jaar", "Meer dan 10 jaar"] },
   { k: "doel", q: "Wat is je belangrijkste doel?", o: ["Mijn geld vooral niet verliezen", "Een beetje meer dan op een spaarrekening", "Mijn vermogen laten groeien", "Zo veel mogelijk groei, ook met grote schommelingen"] },
@@ -410,7 +441,7 @@ function schermInstellingen() {
   h += '<div class="card"><div class="ch"><h2>Koppelingen</h2></div>' +
     '<div class="row"><span>Legati: trainingen</span><b style="color:' + (ok ? "var(--acc)" : "var(--warn)") + '">● ' + (ok ? "Verbonden" : k.legati_link ? "Gestopt" : "Niet ingesteld") + "</b></div>" +
     '<div class="row"><span>Garmin (via Legati)</span><b style="color:' + (lg && lg >= plusDag(vandaag(), -2) ? "var(--acc)" : "var(--mut)") + '">' + (lg ? "laatste dag " + esc(korteDatum(lg)) : "nog niets binnen") + "</b></div>" +
-    '<div class="row"><span>Saxo Bank</span><b class="mut">Volgende stap</b></div><div class="row"><span>iCloud-agenda</span><b class="mut">Volgende stap</b></div><div class="row"><span>Gmail-agenda</span><b class="mut">Volgende stap</b></div>' +
+    '<div class="row"><span>Saxo Bank</span><b style="color:' + (S.saxo?.gekoppeld ? "var(--acc)" : "var(--mut)") + '">' + (S.saxo?.gekoppeld ? "● " + (S.saxo.env === "live" ? "Echte rekening" : "Testomgeving") : "Niet gekoppeld") + '</b></div><div class="row"><span>iCloud-agenda</span><b class="mut">Volgende stap</b></div><div class="row"><span>Gmail-agenda</span><b class="mut">Volgende stap</b></div>' +
     '<p class="src">Laatste ophaling uit Legati: ' + esc(sinds(k.legati_ok)) + ". Elk kwartier. Alles alleen lezen; deze app schrijft niets terug naar Legati.</p></div>";
   h += '<div class="card"><div class="ch"><h2>Meldingen</h2></div><div id="meld"><p class="empty"><span class="spin"></span></p></div></div>';
   h += '<div class="card"><div class="ch"><h2>AI-assistent</h2></div><p class="empty" id="aiStat">' + (S.aiFout === "geen_sleutel" ? "Staat nog uit: zet je Anthropic-sleutel als geheim <b>ANTHROPIC_API_KEY</b> in Supabase (project AD Omniserve, Edge Functions, Secrets)." : "Beantwoordt vragen over je trainingen en herstel, en schrijft na elke nieuwe training een eerlijke analyse. Ziet geen beleggingen.") + "</p></div>";
@@ -494,7 +525,7 @@ const TABS = [["home", "Home", '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9
   ["instellingen", "Instellingen", '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>']];
 function teken() {
   if (!S.geladen) return;
-  const h = (location.hash || "#home").slice(1), [r, arg] = h.split("/");
+  const h = (location.hash || "#home").slice(1).split("?")[0], [r, arg] = h.split("/");
   const tab = { vragenlijst: "beleggen" }[r] || (TABS.some((t) => t[0] === r) ? r : "home");
   const html = r === "sport" && arg ? schermTraining(decodeURIComponent(arg)) : r === "sport" ? schermSport() : r === "beleggen" ? schermBeleggen() : r === "vragenlijst" ? schermVragenlijst()
     : r === "agenda" ? schermAgenda() : r === "instellingen" ? schermInstellingen() : schermHome();
@@ -521,6 +552,17 @@ document.addEventListener("click", async (e) => {
   if (act === "chatleeg") { CHAT = []; bewaarChat(); tekenChat(); return; }
   if (act === "uitloggen") { await sb.auth.signOut(); location.hash = ""; location.reload(); return; }
   if (act === "maan" || act === "mtest" || act === "muit") return meldActie(act, t);
+  if (act && act.startsWith("saxo-")) {
+    const m = $("saxoMsg"), zeg = (x) => { if (m) m.textContent = x; }; t.disabled = true;
+    try {
+      if (act === "saxo-sim" || act === "saxo-live") { zeg("Je gaat naar Saxo om in te loggen…"); const j = await fn("saxo", "start", { env: act === "saxo-live" ? "live" : "sim" }); location.href = j.url; return; }
+      if (act === "saxo-stop") { if (!confirm("Saxo ontkoppelen? Je gegevens uit Saxo worden uit de app verwijderd.")) { t.disabled = false; return; } await fn("saxo", "stop"); }
+      if (act === "saxo-nu") { zeg("Bezig…"); const j = await fn("saxo", "nu"); if (j.error) throw { code: j.error }; }
+      S.saxoMelding = null; await laad(); teken();
+    } catch (err) { zeg(SAXOFOUT[err && err.code] || "Dat lukte niet (" + ((err && err.code) || "fout") + ")."); t.disabled = false; }
+    return;
+  }
+
   if (t.id === "heranalyse") {
     const m = $("anaMsg"); t.disabled = true; m.innerHTML = '<span class="spin"></span> De analyse wordt geschreven…';
     try { const j = await fn("ai", "", { kind: "analyse", ref: t.dataset.ref }); S.ana[t.dataset.ref] = { ref: t.dataset.ref, tekst: j.text, created_at: new Date().toISOString() }; S.aiFout = null; teken(); }
@@ -586,6 +628,8 @@ async function start(session) {
   if (!session) { S = { ...S, user: null, geladen: false }; schermLogin(); return; }
   if (BEZIG || (S.user && S.user.id === session.user.id && S.geladen)) return;
   BEZIG = true; S.user = session.user;
+  const sq = new URLSearchParams(location.hash.split("?")[1] || "");
+  if (sq.get("saxo")) { const v = sq.get("saxo"); S.saxoMelding = { ok: v === "ok", t: { ok: "Saxo is gekoppeld.", deels: "Saxo is gekoppeld, maar de gegevens konden nog niet opgehaald worden. Probeer Nu vernieuwen.", verlopen: "Het koppelen duurde te lang. Probeer opnieuw.", fout: "Het koppelen met Saxo lukte niet. Probeer opnieuw." }[v] || "Saxo: " + v }; history.replaceState(null, "", location.pathname + "#beleggen"); }
   try { await laad(); teken(); }
   catch (e) { console.error(e); $("app").innerHTML = '<div class="login"><div class="card"><p>De gegevens konden niet geladen worden. Controleer je verbinding.</p><button class="btn" onclick="location.reload()">Opnieuw</button></div></div>'; }
   BEZIG = false;
