@@ -18,7 +18,7 @@ function sbKey(): string {
   return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 }
 const db = createClient(SUPABASE_URL, sbKey(), { auth: { persistSession: false, autoRefreshToken: false } });
-const CONTACT = Deno.env.get("PUSH_CONTACT") ?? "https://dhaeneee.github.io/SIG-Dagboek";
+const CONTACT = Deno.env.get("PUSH_CONTACT") ?? "https://dhaeneee.github.io/Austin-life";
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -179,7 +179,7 @@ export async function onEvent(e: any) {
     const s = r?.data?.summary ?? {}, start = Number(s.startTimeInSeconds ?? 0);
     if (!start || Date.now() / 1000 - start > 36 * 3600) return { skip: "oud" };        // geen meldingen voor oude trainingen
     const line = actLine(s); if (!line) return { skip: "sport" };
-    const n = await toUser(e.user_id, { title: "Nieuwe training binnen", body: `${line}. Bekijk je analyse.`, url: r?.day === localDay() ? "#vandaag" : "#logboek", tag: `act-${e.ref}` });
+    const n = await toUser(e.user_id, { title: "Nieuwe training binnen", body: `${line}. Bekijk je analyse.`, url: `#sport/${e.ref}`, tag: `act-${e.ref}` });
     const { data: p } = await db.from("profiles").select("naam,status,coach_id").eq("id", e.user_id).maybeSingle();
     let c = 0;
     if (p?.status === "actief" && p.coach_id && p.coach_id !== e.user_id) {

@@ -5,12 +5,31 @@
 //   - Een training die je zelf maakte of aanpaste (zonder bron "legati"), wordt nooit overschreven.
 //   - Verdwijnt een training uit Legati, dan verdwijnt ze hier ook, maar enkel als ze nog ongewijzigd uit Legati kwam.
 //   - Weeknotities idem.
+//   - Garmin: je eigen Garmin-gegevens komen mee via dezelfde Legati-link (geen aparte Garmin-koppeling).
+//     Nieuwe activiteit -> melding (trigger op garmin_data) en een eerlijke AI-analyse (tabel analyse).
 // Deploy zonder JWT-controle.
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { analysePrompt, gezondheid, MODEL, SYSTEEM, vraag } from "./coach.ts";
 
 const DAG = /^\d{4}-\d{2}-\d{2}$/;
 const VELDEN = ["k", "sp", "s", "t", "min", "z", "km"];
+const KINDS = ["daily", "sleep", "hrv", "stress", "metrics", "activity"];
+
+// welke Garmin-rijen uit de feed nieuw of gewijzigd zijn
+export function garminWijzigingen(feed: any, bestaand: { kind: string; ref: string; data: unknown }[]) {
+  const oud = new Map(bestaand.map((r) => [r.kind + "|" + r.ref, JSON.stringify(r.data)]));
+  const rows: any[] = [], nieuw: string[] = [];
+  for (const g of Array.isArray(feed?.garmin) ? feed.garmin : []) {
+    if (!g || !KINDS.includes(g.kind) || typeof g.ref !== "string" || !g.ref || g.ref.length > 80 || !g.data || typeof g.data !== "object") continue;
+    if (g.day != null && !DAG.test(g.day)) continue;
+    const k = g.kind + "|" + g.ref, d = JSON.stringify(g.data);
+    if (oud.get(k) === d) continue;
+    if (!oud.has(k) && g.kind === "activity") nieuw.push(g.ref);
+    rows.push({ kind: g.kind, ref: g.ref, day: g.day ?? null, data: g.data });
+  }
+  return { rows, nieuw };
+}
 
 export function merge(cplan: Record<string, any>, cnote: Record<string, any>, feed: any, vorigeDagen: string[], vorigeWeken: string[], van: string) {
   const plan = { ...cplan }, note = { ...cnote }, dagen: string[] = [], weken: string[] = [];
@@ -71,8 +90,35 @@ if (typeof Deno !== "undefined" && Deno.serve) {
         const { error } = await db.from("plans").upsert({ athlete_id: me.id, cplan: m.plan, cnote: m.note, updated_at: new Date().toISOString(), updated_by: me.id });
         if (error) return await fout("opslaan");
       }
+      // Garmin via Legati
+      const { data: bestaand } = await db.from("garmin_data").select("kind, ref, data").eq("user_id", me.id).gte("day", van);
+      const gw = garminWijzigingen(feed, bestaand ?? []);
+      if (gw.rows.length) {
+        const { error } = await db.from("garmin_data").upsert(gw.rows.map((r) => ({ ...r, user_id: me.id, received_at: new Date().toISOString() })));
+        if (error) { console.error(error); return await fout("garmin_opslaan"); }
+      }
       await db.from("legati_sync").upsert({ id: 1, dagen: m.dagen, weken: m.weken, last_ok: new Date().toISOString(), last_error: null });
-      return out({ ok: true, changed, trainingen: m.dagen.length });
+      // eerlijke analyse voor recente trainingen zonder analyse (max. 2 per keer)
+      let analyses = 0;
+      if (Deno.env.get("ANTHROPIC_API_KEY")) {
+        const sinds = new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10);
+        const { data: acts } = await db.from("garmin_data").select("ref, day, data").eq("user_id", me.id).eq("kind", "activity").gte("day", van).order("day", { ascending: false });
+        const { data: klaar } = await db.from("analyse").select("ref").eq("user_id", me.id);
+        const gedaan = new Set((klaar ?? []).map((r: any) => r.ref));
+        const todo = (acts ?? []).filter((a: any) => a.day >= sinds && !gedaan.has(a.ref)).slice(0, 2);
+        if (todo.length) {
+          const { data: gez } = await db.from("garmin_data").select("kind, day, data").eq("user_id", me.id).neq("kind", "activity").gte("day", new Date(Date.now() - 14 * 864e5).toISOString().slice(0, 10));
+          for (const a of todo) {
+            try {
+              const vorige = (acts ?? []).filter((x: any) => x.ref !== a.ref && x.day <= a.day).map((x: any) => x.data);
+              const h = gezondheid((gez ?? []).filter((r: any) => r.day <= a.day));
+              const tekst = await vraag(SYSTEEM, [{ role: "user", content: analysePrompt(a.data, m.plan[a.day] ?? null, h, vorige) }], 1500);
+              if (tekst) { await db.from("analyse").upsert({ user_id: me.id, ref: a.ref, tekst: tekst.slice(0, 8000), model: MODEL }); analyses++; }
+            } catch (e) { console.error("analyse", a.ref, String(e)); break; }
+          }
+        }
+      }
+      return out({ ok: true, changed, trainingen: m.dagen.length, garmin: gw.rows.length, nieuw: gw.nieuw.length, analyses });
     } catch (e) { console.error(e); return await fout("fout"); }
   });
 }

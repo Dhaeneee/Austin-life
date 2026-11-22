@@ -1,6 +1,7 @@
-// Legati Tri Dagboek AI-functie: testverslagen inlezen (foto of pdf) en een week aanpassen.
+// AD Omniserve AI-functie: assistent (kind "chat") en de analyse van een training opnieuw maken (kind "analyse").
 // De Anthropic-sleutel staat als geheim ANTHROPIC_API_KEY in Supabase en komt nooit in de website.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { analysePrompt, feiten, gezondheid, MODEL as AI_MODEL, SYSTEEM, vraag } from "./coach.ts";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -13,12 +14,7 @@ function sbKey(kind: "secret" | "publishable"): string {
   return Deno.env.get(kind === "secret" ? "SUPABASE_SERVICE_ROLE_KEY" : "SUPABASE_ANON_KEY") ?? "";
 }
 const SERVICE_KEY = sbKey("secret");
-const MODEL: Record<string, string> = {
-  lab: Deno.env.get("AI_MODEL_LAB") ?? "claude-sonnet-5-5",
-  adapt: Deno.env.get("AI_MODEL_QUICK") ?? "claude-haiku-5-5",
-};
 const DAILY_LIMIT = Number(Deno.env.get("AI_DAILY_LIMIT") ?? "40");
-const TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"];
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -43,41 +39,48 @@ Deno.serve(async (req) => {
     if (!prof || prof.status !== "actief") return json({ error: "geen_lid" }, 403);
 
     const body = await req.json().catch(() => ({}));
-    const kind = body.kind === "lab" || body.kind === "adapt" ? body.kind : null;
-    const prompt = typeof body.prompt === "string" ? body.prompt : "";
-    if (!kind || !prompt || prompt.length > 15000) return json({ error: "ongeldig" }, 400);
-    const files = Array.isArray(body.files) ? body.files.slice(0, 4) : [];
-    for (const f of files) {
-      if (!f || !TYPES.includes(f.mediaType) || typeof f.data !== "string" || f.data.length > 7_000_000) {
-        return json({ error: "bestand" }, 400);
+    if (body.kind === "chat" || body.kind === "analyse") {
+      const dag = new Date().toISOString().slice(0, 10);
+      const { data: use } = await admin.from("ai_usage").select("n").eq("user_id", user.id).eq("dag", dag).maybeSingle();
+      if ((use?.n ?? 0) >= DAILY_LIMIT) return json({ error: "limiet" }, 429);
+      const iso = (n: number) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
+      const [{ data: acts }, { data: gez }, { data: pl }] = await Promise.all([
+        admin.from("garmin_data").select("ref, day, data").eq("user_id", user.id).eq("kind", "activity").gte("day", iso(-30)).order("day", { ascending: false }),
+        admin.from("garmin_data").select("kind, day, data").eq("user_id", user.id).neq("kind", "activity").gte("day", iso(-14)),
+        admin.from("plans").select("cplan, cnote").eq("athlete_id", user.id).maybeSingle(),
+      ]);
+      const cplan = pl?.cplan ?? {};
+      try {
+        if (body.kind === "analyse") {
+          const ref = typeof body.ref === "string" ? body.ref : "";
+          const a = (acts ?? []).find((x) => x.ref === ref);
+          if (!a) return json({ error: "onbekend" }, 404);
+          await admin.from("ai_usage").upsert({ user_id: user.id, dag, n: (use?.n ?? 0) + 1 });
+          const vorige = (acts ?? []).filter((x) => x.ref !== ref && x.day <= a.day).map((x) => x.data);
+          const tekst = await vraag(SYSTEEM, [{ role: "user", content: analysePrompt(a.data, cplan[a.day] ?? null, gezondheid((gez ?? []).filter((r) => r.day <= a.day)), vorige) }], 1500);
+          await admin.from("analyse").upsert({ user_id: user.id, ref, tekst: tekst.slice(0, 8000), model: AI_MODEL });
+          return json({ text: tekst });
+        }
+        const msgs = (Array.isArray(body.messages) ? body.messages : []).slice(-16)
+          .filter((m: { role: string; content: unknown }) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.length <= 4000)
+          .map((m: { role: "user" | "assistant"; content: string }) => ({ role: m.role, content: m.content }));
+        if (!msgs.length || msgs[msgs.length - 1].role !== "user" || msgs[0].role !== "user") return json({ error: "ongeldig" }, 400);
+        await admin.from("ai_usage").upsert({ user_id: user.id, dag, n: (use?.n ?? 0) + 1 });
+        const plan: Record<string, unknown> = {};
+        for (const d of Object.keys(cplan).sort()) if (d >= iso(-14) && d <= iso(21)) plan[d] = cplan[d];
+        const ctx = `Vandaag is het ${dag}.
+Wat je weet (enkel sport en gezondheid; beleggingen en agenda zijn nog niet gekoppeld, zeg dat eerlijk als ernaar gevraagd wordt):
+Trainingsschema uit Legati (vorige 2 weken en komende 3 weken): ${JSON.stringify(plan)}
+Garmin-trainingen laatste 30 dagen: ${JSON.stringify((acts ?? []).slice(0, 25).map((a) => ({ dag: a.day, ...feiten(a.data) })).map((f: Record<string, unknown>) => { delete f.hartslag_per_kwart; delete f.ronden; return f; }))}
+Gezondheid laatste 14 dagen: ${JSON.stringify(gezondheid(gez ?? []))}`;
+        const tekst = await vraag(SYSTEEM + "\nJe bent ook zijn algemene assistent in de app. Beantwoord vragen kort. Je kunt niets wijzigen in de app of in Legati; trainingen plant hij zelf in Legati. Je geeft nooit beleggingsorders en geen persoonlijk beleggingsadvies als feit.\n\n" + ctx, msgs, 1500);
+        return json({ text: tekst });
+      } catch (e) {
+        const c = String((e as Error).message ?? e);
+        return json({ error: ["geen_sleutel", "druk", "geweigerd"].includes(c) ? c : "ai_fout" }, c === "geen_sleutel" ? 503 : 502);
       }
     }
-
-    const dag = new Date().toISOString().slice(0, 10);
-    const { data: use } = await admin.from("ai_usage").select("n").eq("user_id", user.id).eq("dag", dag).maybeSingle();
-    const n = use?.n ?? 0;
-    if (n >= DAILY_LIMIT) return json({ error: "limiet" }, 429);
-    await admin.from("ai_usage").upsert({ user_id: user.id, dag, n: n + 1 });
-
-    const content = [
-      ...files.map((f: { mediaType: string; data: string }) =>
-        f.mediaType === "application/pdf"
-          ? { type: "document", source: { type: "base64", media_type: f.mediaType, data: f.data } }
-          : { type: "image", source: { type: "base64", media_type: f.mediaType, data: f.data } }),
-      { type: "text", text: prompt },
-    ];
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: MODEL[kind], max_tokens: kind === "lab" ? 2000 : 1500, messages: [{ role: "user", content }] }),
-    });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) {
-      console.error("anthropic", r.status, JSON.stringify(j).slice(0, 600));
-      return json({ error: r.status === 429 || r.status === 529 ? "druk" : "ai_fout" }, 502);
-    }
-    const text = (j.content ?? []).filter((c: { type: string }) => c.type === "text").map((c: { text: string }) => c.text).join("");
-    return json({ text });
+    return json({ error: "ongeldig" }, 400);
   } catch (e) {
     console.error(e);
     return json({ error: "fout" }, 500);
