@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>AD Omniserve</title>
-<meta name="description" content="Persoonlijke app van Austin: sport, beleggen en agenda">
+<title>Austin Life</title>
+<meta name="description" content="Persoonlijke cockpit van Austin: vandaag, taken, agenda, werk, sport en beleggen">
 <meta name="theme-color" content="#0E1116">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="AD Omniserve">
+<meta name="apple-mobile-web-app-title" content="Austin Life">
 <meta name="robots" content="noindex">
 <link rel="manifest" href="manifest.webmanifest?v=omni1">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -28,11 +28,11 @@ button,input,select,textarea{font:inherit;color:inherit}
 a{color:var(--acc)}
 #app{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 100px)}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.brand{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+.brand{font-size:19px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
 .av{width:34px;height:34px;border-radius:50%;background:var(--met2);display:grid;place-items:center;font-weight:600;font-size:14px;border:0;cursor:pointer}
 h1{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:2px 0 4px}
 .sub{color:var(--mut);font-size:15px;margin-bottom:18px}
-.card{background:var(--card);border-radius:20px;padding:16px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
 .ch{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:10px}
 .ch h2{font-size:17px;font-weight:650}
 .ch a,.lnk{font-size:14px;color:var(--acc);text-decoration:none;font-weight:500;background:none;border:0;cursor:pointer}
@@ -43,7 +43,7 @@ p{line-height:1.5}
 .alert{border-radius:14px;padding:11px 12px;font-size:14px;margin-bottom:10px;line-height:1.4;display:flex;gap:10px;align-items:flex-start}
 .alert b{font-weight:650}.a-warn{background:var(--warn2);color:var(--warn)}.a-ok{background:var(--acc2);color:var(--acc)}.a-gold{background:var(--gold2);color:var(--gold)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.met{background:var(--met);border-radius:14px;padding:12px}.met .l{font-size:12px;color:var(--mut)}
+.met{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}.met .l{font-size:12px;color:var(--mut)}
 .met .v{font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}.met .v small{font-size:13px;font-weight:500;color:var(--mut)}
 .row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);font-size:15px}
 .row:first-child{border-top:0;padding-top:2px}.row>span{color:var(--mut)}.row b{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
@@ -98,553 +98,89 @@ button.ev{width:100%;background:none;border-left:0;border-right:0;border-bottom:
 @keyframes sp{to{transform:rotate(360deg)}}
 .bar{height:8px;background:var(--met);border-radius:4px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:var(--acc);border-radius:4px}
 .hide{display:none!important}
+/* ---- cockpit (versie 2) ---- */
+.card .met{background:var(--met);border-color:transparent}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.tile{display:flex;gap:12px;align-items:center}.tile .ti{font-size:20px;color:var(--acc);width:24px;text-align:center}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:8px;background:var(--sport);color:#1A0F08}
+.hero{display:flex;gap:14px;align-items:center;margin:10px 0 2px}.hero .hi{font-size:40px;line-height:1}
+.hero b{display:block;font-size:19px;font-weight:700;color:var(--ink)}.hero span{color:var(--mut);font-size:14px}
+.btn-out{background:none;border:1.5px solid var(--met2);color:var(--ink)}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;white-space:nowrap;background:var(--met2);color:var(--ink)}
+.pill.laat{background:var(--warn2);color:var(--warn)}.pill.nu{background:var(--sport2);color:var(--sport)}
+.top .topr{display:flex;gap:8px;align-items:center}
+.oog{width:34px;height:34px;border-radius:50%;background:var(--met);border:0;cursor:pointer;font-size:16px}
+.alert[data-go]{cursor:pointer}
+.t-warn{background:var(--warn2);color:var(--warn)}
+.lbl{font-size:10px;padding:2px 6px;vertical-align:2px;font-weight:600}
+.st-fout{color:var(--warn)!important}
+.taak{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.taak:first-of-type,.ch+.taak{border-top:0}
+.vink{width:26px;height:26px;border-radius:50%;border:2px solid var(--met2);background:none;flex:none;cursor:pointer;color:var(--onacc);font-weight:800;font-size:14px}
+.taak.klaar .vink{background:var(--acc);border-color:var(--acc)}
+.taak.klaar .tt b{text-decoration:line-through;color:var(--mut)}
+.tt{flex:1;min-width:0;text-align:left;background:none;border:0;cursor:pointer;padding:0}
+.tt b{display:block;font-size:15px;font-weight:550;line-height:1.3}.tt span{display:block;font-size:13px;color:var(--mut);margin-top:2px}
+.prio1{color:var(--warn);font-weight:800}
+.fab{position:fixed;right:max(16px,calc(50vw - 264px));bottom:calc(env(safe-area-inset-bottom) + 76px);width:56px;height:56px;border-radius:50%;background:var(--acc);color:var(--onacc);border:0;font-size:30px;font-weight:400;line-height:1;box-shadow:0 6px 20px rgba(0,0,0,.35);z-index:25;cursor:pointer}
+.sheetbody{flex:1;overflow-y:auto;padding:14px 16px calc(env(safe-area-inset-bottom) + 24px)}
+.field select,.field textarea,.selectknop{width:100%;background:var(--met);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;outline:none;-webkit-appearance:none;appearance:none}
+.selectknop{margin-top:12px;padding:13px}
+.field textarea{resize:vertical;min-height:70px}
+.field select:focus,.field textarea:focus{border-color:var(--acc)}
+.field .seg{margin-top:2px}.seg10 button{padding:8px 0;font-size:13px}
+.seg.scroll{overflow-x:auto;scrollbar-width:none}.seg.scroll button{flex:none;padding:8px 12px}
+.chk{display:flex;gap:10px;align-items:center;margin-top:12px;font-size:15px;cursor:pointer}.chk input{width:20px;height:20px;accent-color:var(--acc)}
+.btn-weg{background:none;color:var(--warn);border:1px solid var(--warn2)}
+textarea.groot{width:100%;background:var(--met);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:17px;outline:none;resize:none}
+textarea.groot:focus{border-color:var(--acc)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--met);color:var(--ink);font-size:14px;padding:8px 12px;border-radius:99px;cursor:pointer}
+.chip.on{background:var(--acc2);border-color:var(--acc);color:var(--acc);font-weight:600}
+.fotoknop{display:block}.foto{margin-top:10px}.foto img{max-width:100%;border-radius:12px;display:block}
+.kies{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.kies:first-of-type{border-top:0}.kies input{width:22px;height:22px;accent-color:var(--acc);flex:none}
+.kies span{display:flex;flex-direction:column}.kies b{font-weight:550;font-size:15px}.kies i{font-style:normal;font-size:13px;color:var(--mut)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 140px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:14px;font-weight:600;z-index:60}
+.gv{margin-top:10px}.seg5{display:flex;gap:6px;margin-top:4px}
+.seg5 button{flex:1;border:0;background:var(--met);border-radius:10px;padding:10px 0;font-weight:650;cursor:pointer;color:var(--mut)}
+.seg5 button.on{background:var(--acc);color:var(--onacc)}
+.gvl{display:flex;justify-content:space-between;margin-top:2px;font-size:11px}.gvl i{font-style:normal}
+.agi{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+.agi:first-child,.ch+.agi,.wkdag>.lnk+.agi{border-top:0}
+.agi>i{width:4px;align-self:stretch;border-radius:2px;flex:none;min-height:22px}
+.agt{width:92px;flex:none;font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums;padding-top:1px}
+.agn{flex:1;min-width:0}.agn b{display:block;font-weight:550;font-size:15px;line-height:1.3}.agn em{display:block;font-style:normal;font-size:12px;color:var(--mut)}
+.agi.conflict .agt{color:var(--warn)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin:-8px 0 12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.wkdag{padding:10px 0;border-top:1px solid var(--line)}.wkdag:first-of-type{border-top:0}.wkdag>.lnk{font-weight:650;padding:0;text-transform:capitalize}
+.wkdag.nu>.lnk{color:var(--acc)}
+.mic{width:36px;height:36px;border-radius:10px;background:var(--met);display:grid;place-items:center;font-size:18px}
+.lijst{margin:8px 0 0 20px;font-size:14px;line-height:1.5;color:var(--mut)}
+.hulp p{font-size:14px;line-height:1.55;margin-bottom:10px}
+.herstel{margin-top:12px;background:var(--met);border-radius:14px;padding:12px}
+@media (min-width:900px){#app{max-width:680px}.sheet{max-width:680px}}
 </style>
 </head>
 <body>
 <div id="app"><p class="mut" style="margin-top:30vh;text-align:center"><span class="spin"></span></p></div>
 <nav class="tabbar hide" id="tabbar"></nav>
+<button class="fab hide" id="fab" aria-label="Snel toevoegen" title="Snel toevoegen">+</button>
 <div id="sheet"></div>
 <script src="config.js"></script>
 <script src="vendor/supabase.js"></script>
-<script>
-"use strict";
-/* ================= basis ================= */
-const CFG = window.TD_CONFIG || {};
-const sb = window.supabase && CFG.url && CFG.key ? supabase.createClient(CFG.url, CFG.key) : null;
-const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const store = { get(k, d) { try { const v = localStorage.getItem("omni." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem("omni." + k, JSON.stringify(v)); } catch (e) { /* privévenster */ } } };
-const pad = (n) => String(n).padStart(2, "0");
-const isoDag = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
-const vandaag = () => isoDag(new Date());
-const plusDag = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return isoDag(d); };
-const maandagVan = (iso) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return isoDag(d); };
-const DAGEN = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
-const MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
-const langeDatum = (iso) => { const d = new Date(iso + "T12:00:00"); return DAGEN[d.getDay()] + " " + d.getDate() + " " + MAANDEN[d.getMonth()]; };
-const korteDatum = (iso) => { const d = new Date(iso + "T12:00:00"); return d.getDate() + " " + MAANDEN[d.getMonth()].slice(0, 3); };
-const getal = (x, dec = 0) => Number(x).toLocaleString("nl-BE", { minimumFractionDigits: dec, maximumFractionDigits: dec });
-const euro = (x) => "€ " + Number(x).toLocaleString("nl-BE", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-const duur = (sec) => { const m = Math.round(sec / 60); return m >= 60 ? Math.floor(m / 60) + "u" + pad(m % 60) : m + " min"; };
-const sinds = (ts) => { if (!ts) return "nog nooit"; const m = Math.round((Date.now() - new Date(ts).getTime()) / 60000);
-  if (m < 2) return "net nu"; if (m < 60) return m + " min geleden"; const u = Math.round(m / 60); if (u < 24) return u + " uur geleden";
-  const d = Math.round(u / 24); return d === 1 ? "gisteren" : d + " dagen geleden"; };
-
-/* ================= thema ================= */
-function zetThema() {
-  const t = store.get("thema", "donker");
-  const licht = t === "licht" || (t === "systeem" && window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches);
-  document.documentElement.classList.toggle("licht", licht);
-  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = licht ? "#F3F4F6" : "#0E1116";
-}
-zetThema();
-if (window.matchMedia) matchMedia("(prefers-color-scheme: light)").addEventListener?.("change", zetThema);
-
-/* ================= sporten ================= */
-const SPORT = {
-  lopen: { n: "Lopen", e: "🏃", c: "t-s" }, fietsen: { n: "Fietsen", e: "🚴", c: "t-w" }, zwemmen: { n: "Zwemmen", e: "🏊", c: "t-a" },
-  kracht: { n: "Kracht", e: "💪", c: "t-p" }, wandelen: { n: "Wandelen", e: "🥾", c: "t-g" }, squash: { n: "Squash", e: "🎾", c: "t-p" },
-  rust: { n: "Rust", e: "🌙", c: "t-g" }, andere: { n: "Andere", e: "⏱️", c: "t-g" },
-};
-const GTYPE = { RUNNING: "lopen", TRAIL_RUNNING: "lopen", TREADMILL_RUNNING: "lopen", INDOOR_RUNNING: "lopen", CYCLING: "fietsen", ROAD_BIKING: "fietsen",
-  INDOOR_CYCLING: "fietsen", VIRTUAL_RIDE: "fietsen", MOUNTAIN_BIKING: "fietsen", GRAVEL_CYCLING: "fietsen", LAP_SWIMMING: "zwemmen",
-  OPEN_WATER_SWIMMING: "zwemmen", SWIMMING: "zwemmen", STRENGTH_TRAINING: "kracht", HIKING: "wandelen", WALKING: "wandelen", SQUASH: "squash" };
-const sportVanAct = (s) => GTYPE[String(s?.activityType || "").toUpperCase()] || "andere";
-const sportVanPlan = (p) => p?.k === "rust" ? "rust" : (SPORT[p?.sp] ? p.sp : ({ run: "lopen", bike: "fietsen", swim: "zwemmen", kracht: "kracht" }[p?.k] || "andere"));
-
-/* ================= gegevens ================= */
-let S = { user: null, prof: null, plan: {}, note: {}, acts: [], gez: [], ana: {}, bel: null, kop: null, saxo: null, stand: null, saxoMelding: null, aiFout: null, geladen: false };
-async function laad() {
-  const uid = S.user.id, van = plusDag(vandaag(), -60);
-  const [prof, plan, gd, an, bel, kop, sx, st] = await Promise.all([
-    sb.from("profiles").select("naam").eq("id", uid).maybeSingle(),
-    sb.from("plans").select("cplan,cnote").eq("athlete_id", uid).maybeSingle(),
-    sb.from("garmin_data").select("kind,ref,day,data,received_at").eq("user_id", uid).gte("day", van).order("day", { ascending: false }).limit(1000),
-    sb.from("analyse").select("ref,tekst,created_at").eq("user_id", uid),
-    sb.from("belegger").select("antwoorden,profiel,updated_at").eq("user_id", uid).maybeSingle(),
-    sb.rpc("koppelingen"),
-    sb.rpc("saxo_status"),
-    sb.from("saxo_stand").select("env,data,opgehaald").eq("user_id", uid).maybeSingle(),
-  ]);
-  S.prof = prof.data || {}; S.plan = plan.data?.cplan || {}; S.note = plan.data?.cnote || {};
-  const rows = gd.data || [];
-  S.acts = rows.filter((r) => r.kind === "activity").sort((a, b) => (b.data?.summary?.startTimeInSeconds || 0) - (a.data?.summary?.startTimeInSeconds || 0));
-  S.gez = rows.filter((r) => r.kind !== "activity");
-  S.ana = Object.fromEntries((an.data || []).map((r) => [r.ref, r]));
-  S.bel = bel.data || null; S.kop = kop.data || null; S.saxo = sx.data || null; S.stand = st.data || null; S.geladen = true;
-}
-// gezondheid per dag
-function gezDag(dag) {
-  const o = {};
-  for (const r of S.gez) if (r.day === dag) {
-    const g = r.data || {};
-    if (r.kind === "sleep") { if (g.durationInSeconds) o.slaap = g.durationInSeconds; const sc = g.overallSleepScore?.value ?? g.sleepScores?.overall?.value; if (sc != null) o.score = sc; }
-    if (r.kind === "hrv" && g.lastNightAvg != null) o.hrv = g.lastNightAvg;
-    if (r.kind === "daily" && g.restingHeartRateInBeatsPerMinute != null) o.rp = g.restingHeartRateInBeatsPerMinute;
-    if (r.kind === "stress") { if (g.bbMax != null) o.bb = g.bbMax; }
-    if (r.kind === "metrics" && g.vo2Max != null) o.vo2 = g.vo2Max;
-  }
-  return o;
-}
-function reeks(veld, n = 14) { const out = []; for (let i = n - 1; i >= 0; i--) { const d = plusDag(vandaag(), -i); out.push({ d, v: gezDag(d)[veld] ?? null }); } return out; }
-
-/* ================= meldingen over koppelingen ================= */
-function waarschuwingen() {
-  const w = [], k = S.kop;
-  if (!k) return w;
-  if (!k.legati_link) w.push("De koppeling met Legati is nog niet ingesteld. Trainingen en Garmin-gegevens komen dan niet binnen.");
-  else if (k.legati_fout) w.push("De koppeling met Legati gaf een fout (" + esc(k.legati_fout) + "). Laatste keer gelukt: " + sinds(k.legati_ok) + ".");
-  else if (!k.legati_ok || Date.now() - new Date(k.legati_ok).getTime() > 2 * 3600e3) w.push("De koppeling met Legati is gestopt: laatste keer gelukt " + sinds(k.legati_ok) + ".");
-  const lg = S.gez.reduce((m, r) => (r.day > m ? r.day : m), "");
-  if (k.legati_ok && lg && lg < plusDag(vandaag(), -2)) w.push("Er komen geen nieuwe Garmin-gegevens meer binnen sinds " + langeDatum(lg) + ". Kijk of je horloge nog synchroniseert met Garmin Connect en of Garmin nog gekoppeld is in de Legati-app.");
-  const x = S.saxo;
-  if (x && x.env && x.last_error && !x.gekoppeld) w.push("De koppeling met Saxo is gestopt. Koppel opnieuw bij Beleggen.");
-  else if (x && x.gekoppeld && x.last_ok && Date.now() - new Date(x.last_ok).getTime() > 2 * 3600e3) w.push("Saxo gaf geen nieuwe gegevens meer sinds " + sinds(x.last_ok) + ".");
-  return w;
-}
-const alerts = () => waarschuwingen().map((t) => '<div class="alert a-warn"><span>⚠️</span><span>' + t + "</span></div>").join("");
-
-/* ================= kleine bouwstenen ================= */
-function planRegel(p) {
-  if (!p) return null;
-  const sp = sportVanPlan(p), x = SPORT[sp];
-  const extra = [p.t, p.km ? (sp === "zwemmen" ? getal(p.km * 1000) + " m" : getal(p.km, 1) + " km") : ""].filter(Boolean).join(" · ");
-  return { sp, x, titel: p.s || x.n, extra, z: p.z || "" };
-}
-function planEv(dag, p, metDatum) {
-  const r = planRegel(p); if (!r) return "";
-  return '<div class="ev"><div class="ic ' + r.x.c + '">' + r.x.e + '</div><div class="et"><b>' + esc(r.titel) + (r.extra ? ' <span class="mut" style="display:inline;font-weight:500">· ' + esc(r.extra) + "</span>" : "") + "</b>" +
-    (metDatum ? '<span>' + esc(langeDatum(dag)) + "</span>" : "") + (r.z ? "<span>" + esc(r.z) + "</span>" : "") + "</div></div>";
-}
-function actSamenvatting(a) {
-  const s = a.data?.summary || {}, sp = sportVanAct(s), m = Number(s.distanceInMeters || 0), v = Number(s.averageSpeedInMetersPerSecond || 0), sec = Number(s.durationInSeconds || 0);
-  const bits = [];
-  if (sec) bits.push(duur(sec));
-  if (m >= 300 && !["squash", "kracht"].includes(sp)) bits.push(sp === "zwemmen" ? getal(m) + " m" : getal(m / 1000, 1) + " km");
-  if (v > 0 && sp === "lopen") { const p = 1000 / v; bits.push(Math.floor(p / 60) + ":" + pad(Math.round(p % 60)) + " /km"); }
-  if (v > 0 && sp === "fietsen") bits.push(getal(v * 3.6, 1) + " km/u");
-  if (v > 0 && sp === "zwemmen") { const p = 100 / v; bits.push(Math.floor(p / 60) + ":" + pad(Math.round(p % 60)) + " /100m"); }
-  if (s.averageHeartRateInBeatsPerMinute) bits.push("♥ " + s.averageHeartRateInBeatsPerMinute);
-  return { s, sp, x: SPORT[sp], bits, titel: s.activityName || SPORT[sp].n };
-}
-function actEv(a) {
-  const r = actSamenvatting(a), an = S.ana[a.ref];
-  return '<button class="ev" data-go="#sport/' + esc(a.ref) + '"><div class="ic ' + r.x.c + '">' + r.x.e + '</div><div class="et"><b>' + esc(r.titel) + "</b><span>" +
-    esc(korteDatum(a.day) + " · " + r.bits.join(" · ")) + "</span>" + (an ? '<span style="color:var(--acc)">Analyse klaar</span>' : "") + '</div><span class="chev">›</span></button>';
-}
-function spark(punten, kleur, eenheid) {
-  const vals = punten.map((p) => p.v).filter((v) => v != null);
-  if (vals.length < 2) return '<p class="empty">Nog te weinig gegevens.</p>';
-  const W = 320, H = 84, lo = Math.min(...vals), hi = Math.max(...vals), sp = hi - lo || 1, n = punten.length;
-  const xy = punten.map((p, i) => p.v == null ? null : [8 + (i * (W - 16)) / (n - 1), 10 + (H - 26) * (1 - (p.v - lo) / sp)]);
-  let d = "", pen = false; xy.forEach((q) => { if (!q) { pen = false; return; } d += (pen ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1); pen = true; });
-  const last = [...xy].reverse().find(Boolean);
-  return '<svg class="spark" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Verloop"><path d="' + d + '" fill="none" stroke="' + kleur + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>' +
-    (last ? '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="3.5" fill="' + kleur + '"/>' : "") +
-    '<text x="8" y="' + (H - 2) + '" font-size="11" fill="var(--mut)">' + esc(korteDatum(punten[0].d)) + '</text><text x="' + (W - 8) + '" y="' + (H - 2) + '" font-size="11" fill="var(--mut)" text-anchor="end">laag ' + getal(lo) + " · hoog " + getal(hi) + (eenheid ? " " + eenheid : "") + "</text></svg>";
-}
-function hrGrafiek(a) {
-  const hr = a.data?.st?.hr || [], t = a.data?.st?.t || [];
-  const pts = hr.map((v, i) => ({ v: typeof v === "number" ? v : null, x: t[i] ?? i })).filter((p) => p.v != null);
-  if (pts.length < 5) return "";
-  const W = 320, H = 110, lo = Math.min(...pts.map((p) => p.v)) - 5, hi = Math.max(...pts.map((p) => p.v)) + 5, x0 = pts[0].x, x1 = pts[pts.length - 1].x || 1;
-  const d = pts.map((p, i) => (i ? "L" : "M") + (8 + ((p.x - x0) / (x1 - x0 || 1)) * (W - 16)).toFixed(1) + " " + (8 + (H - 28) * (1 - (p.v - lo) / (hi - lo))).toFixed(1)).join("");
-  return '<div class="card"><div class="ch"><h2>Hartslag</h2><span class="sm mut">' + Math.round(lo + 5) + "–" + Math.round(hi - 5) + ' bpm</span></div><svg class="spark" style="height:110px" viewBox="0 0 ' + W + " " + H + '"><path d="' + d + '" fill="none" stroke="var(--warn)" stroke-width="1.8" stroke-linejoin="round"/><text x="8" y="' + (H - 4) + '" font-size="11" fill="var(--mut)">start</text><text x="' + (W - 8) + '" y="' + (H - 4) + '" font-size="11" fill="var(--mut)" text-anchor="end">' + Math.round(x1) + ' min</text></svg></div>';
-}
-const tekstAlinea = (t) => String(t || "").split(/\n{2,}|\n/).filter((x) => x.trim()).map((x) => "<p>" + esc(x.replace(/^\s*[-*]\s+/, "")).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>") + "</p>").join("");
-
-/* ================= schermen ================= */
-const kop = (titel, ondertitel) => '<div class="top"><div class="brand">AD Omniserve</div><button class="av" data-go="#instellingen" aria-label="Instellingen">' + esc((S.prof?.naam || "A").trim().charAt(0).toUpperCase() || "A") + "</button></div><h1>" + esc(titel) + '</h1><div class="sub">' + esc(ondertitel) + "</div>";
-
-function schermHome() {
-  const u = new Date().getHours(), groet = u < 6 ? "Goeienacht" : u < 12 ? "Goeiemorgen" : u < 18 ? "Goeiemiddag" : "Goeieavond";
-  const naam = (S.prof?.naam || "").split(" ")[0];
-  const d = vandaag(), pv = S.plan[d], pm = S.plan[plusDag(d, 1)], g = gezDag(d);
-  const vandaagActs = S.acts.filter((a) => a.day === d);
-  let h = kop(groet + (naam ? ", " + naam : ""), langeDatum(d).replace(/^./, (c) => c.toUpperCase())) + alerts();
-  // assistent
-  h += '<div class="card"><div class="ch"><h2>Je assistent</h2><span class="tag t-g">Test</span></div><form class="ask" id="homeAsk"><input id="homeQ" placeholder="Vraag iets over je training…" autocomplete="off" enterkeyhint="send"><button aria-label="Vraag">↑</button></form>' +
-    '<div class="sugg"><button data-vraag="Hoe staat het met mijn herstel vandaag?">Herstel vandaag?</button><button data-vraag="Wat staat er deze week nog op het schema?">Rest van de week</button><button data-vraag="Hoe ging mijn laatste training?">Laatste training</button></div></div>';
-  // vandaag
-  h += '<div class="card"><div class="ch"><h2>Vandaag</h2><a href="#sport">Sport</a></div>';
-  h += pv ? planEv(d, pv) : '<p class="empty">Niets gepland vandaag in Legati.</p>';
-  if (vandaagActs.length) h += '<div style="margin-top:10px">' + vandaagActs.map(actEv).join("") + "</div>";
-  if (pm) h += '<p class="src">Morgen: ' + esc(planRegel(pm).titel) + (planRegel(pm).extra ? " · " + esc(planRegel(pm).extra) : "") + "</p>";
-  h += "</div>";
-  // herstel
-  if (Object.keys(g).length) {
-    h += '<div class="card"><div class="ch"><h2>Herstel</h2><span class="sm mut">vannacht</span></div><div class="grid">' +
-      (g.slaap ? '<div class="met"><div class="l">Slaap</div><div class="v">' + duur(g.slaap) + (g.score != null ? " <small>score " + g.score + "</small>" : "") + "</div></div>" : "") +
-      (g.hrv != null ? '<div class="met"><div class="l">HRV</div><div class="v">' + g.hrv + " <small>ms</small></div></div>" : "") +
-      (g.rp != null ? '<div class="met"><div class="l">Rustpols</div><div class="v">' + g.rp + " <small>bpm</small></div></div>" : "") +
-      (g.bb != null ? '<div class="met"><div class="l">Body Battery</div><div class="v">' + g.bb + "</div></div>" : "") +
-      '</div><p class="src">Uit Garmin, via je Legati-profiel.</p></div>';
-  }
-  // laatste training
-  const laatste = S.acts[0];
-  if (laatste) {
-    const an = S.ana[laatste.ref];
-    h += '<div class="card"><div class="ch"><h2>Laatste training</h2><a href="#sport/' + esc(laatste.ref) + '">Analyse</a></div>' + actEv(laatste) +
-      (an ? '<p class="sm" style="margin-top:8px;line-height:1.5">' + esc(an.tekst.split(/(?<=[.!?])\s/).slice(0, 2).join(" ")) + "</p>" : "") + "</div>";
-  }
-  // agenda + beleggen kort
-  h += '<div class="card"><div class="ch"><h2>Agenda</h2><a href="#agenda">Openen</a></div><p class="empty">Je iCloud- en Gmail-agenda zijn nog niet gekoppeld.</p></div>';
-  h += '<div class="card"><div class="ch"><h2>Beleggen</h2><a href="#beleggen">Openen</a></div><p class="empty">' + (S.bel?.profiel ? "Je beleggersprofiel: <b style=\"color:var(--ink)\">" + esc(S.bel.profiel) + "</b>. " : "") + (S.stand?.data?.totaal != null ? "Saxo: <b style=\"color:var(--ink)\">" + bedrag(S.stand.data.totaal, S.stand.data.munt) + "</b> (" + esc(sinds(S.stand.opgehaald)) + ")." : "Saxo Bank is nog niet gekoppeld, dus hier staan nog geen koersen of posities.") + "</p></div>";
-  return h;
-}
-
-let SPORTDAG = null;
-function schermSport() {
-  const d = vandaag(); SPORTDAG = SPORTDAG || d;
-  const ma = maandagVan(SPORTDAG);
-  let h = kop("Sport", "Gepland in Legati, gemeten door Garmin") + alerts();
-  // weekstrook
-  h += '<div class="card"><div class="ch"><h2>Week van ' + esc(korteDatum(ma)) + '</h2><span><button class="lnk" data-week="-7" aria-label="Vorige week">‹</button> <button class="lnk" data-week="7" aria-label="Volgende week">›</button></span></div><div class="week">';
-  for (let i = 0; i < 7; i++) {
-    const dd = plusDag(ma, i), p = S.plan[dd], has = S.acts.some((a) => a.day === dd), kl = p ? `var(--${{ lopen: "sport", fietsen: "work", zwemmen: "acc", rust: "line" }[sportVanPlan(p)] || "priv"})` : "transparent";
-    h += '<button class="wd' + (dd === SPORTDAG ? " on" : "") + '" data-dag="' + dd + '">' + "mdwdvzz"[i].toUpperCase() + "<b>" + Number(dd.slice(8)) + '</b><i style="background:' + (has ? "var(--ink)" : kl) + '"></i></button>';
-  }
-  h += "</div>";
-  const p = S.plan[SPORTDAG], acts = S.acts.filter((a) => a.day === SPORTDAG);
-  h += '<p class="sm mut" style="margin-bottom:8px">' + esc(langeDatum(SPORTDAG)) + "</p>";
-  h += p ? planEv(SPORTDAG, p) : '<p class="empty">Niets gepland.</p>';
-  if (acts.length) h += '<div style="margin-top:8px">' + acts.map(actEv).join("") + "</div>";
-  const wn = S.note[ma]; if (wn) h += '<p class="src">Weeknotitie: ' + esc(wn) + "</p>";
-  h += "</div>";
-  // komende trainingen
-  const kom = Object.keys(S.plan).filter((x) => x > d && x <= plusDag(d, 10)).sort();
-  h += '<div class="card"><div class="ch"><h2>Komende trainingen</h2></div>' + (kom.length ? kom.map((x) => planEv(x, S.plan[x], true)).join("") : '<p class="empty">Nog niets gepland voor de komende dagen. Plan je trainingen in de Legati-app; ze komen hier binnen een kwartier.</p>') + "</div>";
-  // herstel trends
-  h += '<div class="card"><div class="ch"><h2>Herstel, 14 dagen</h2></div><p class="sm mut">HRV (ms)</p>' + spark(reeks("hrv"), "var(--acc)", "ms") +
-    '<p class="sm mut" style="margin-top:8px">Rustpols (bpm)</p>' + spark(reeks("rp"), "var(--warn)", "bpm") +
-    '<p class="sm mut" style="margin-top:8px">Slaap (uren)</p>' + spark(reeks("slaap").map((p) => ({ d: p.d, v: p.v == null ? null : Math.round(p.v / 360) / 10 })), "var(--work)", "u");
-  const vo2 = S.gez.find((r) => r.kind === "metrics" && r.data?.vo2Max != null);
-  if (vo2) h += '<p class="src">VO2max volgens Garmin: <b style="color:var(--ink)">' + getal(vo2.data.vo2Max, 1) + "</b> (" + esc(korteDatum(vo2.day)) + ")</p>";
-  h += "</div>";
-  // activiteiten
-  h += '<div class="card"><div class="ch"><h2>Trainingen</h2><span class="sm mut">laatste 60 dagen</span></div>' + (S.acts.length ? S.acts.slice(0, 40).map(actEv).join("") : '<p class="empty">Nog geen Garmin-trainingen binnen. Ze komen via je profiel in de Legati-app.</p>') + "</div>";
-  h += '<p class="src" style="text-align:center">Trainingen plan je in de Legati-app. Je Garmin-gegevens komen mee via je Legati-profiel. Niemand van de ploeg ziet deze app.</p>';
-  return h;
-}
-
-function schermTraining(ref) {
-  const a = S.acts.find((x) => x.ref === ref);
-  if (!a) return kop("Training", "") + '<div class="card"><p class="empty">Deze training staat er (nog) niet in.</p><a class="btn btn2" href="#sport" style="text-decoration:none">Terug naar Sport</a></div>';
-  const r = actSamenvatting(a), s = r.s, an = S.ana[ref], p = S.plan[a.day];
-  let h = '<div class="top"><button class="lnk" data-go="#sport">‹ Sport</button><div class="brand">AD Omniserve</div></div><h1 style="font-size:26px">' + esc(r.titel) + '</h1><div class="sub">' + esc(langeDatum(a.day)) + " · " + r.x.n + "</div>";
-  const m = [];
-  if (s.durationInSeconds) m.push(["Duur", duur(s.durationInSeconds)]);
-  if (Number(s.distanceInMeters) >= 300 && !["squash", "kracht"].includes(r.sp)) m.push(["Afstand", r.sp === "zwemmen" ? getal(s.distanceInMeters) + " <small>m</small>" : getal(s.distanceInMeters / 1000, 2) + " <small>km</small>"]);
-  const v = Number(s.averageSpeedInMetersPerSecond || 0);
-  if (v > 0 && r.sp === "lopen") { const q = 1000 / v; m.push(["Tempo", Math.floor(q / 60) + ":" + pad(Math.round(q % 60)) + " <small>/km</small>"]); }
-  if (v > 0 && r.sp === "fietsen") m.push(["Snelheid", getal(v * 3.6, 1) + " <small>km/u</small>"]);
-  if (v > 0 && r.sp === "zwemmen") { const q = 100 / v; m.push(["Tempo", Math.floor(q / 60) + ":" + pad(Math.round(q % 60)) + " <small>/100m</small>"]); }
-  if (s.averageHeartRateInBeatsPerMinute) m.push(["Hartslag gem.", s.averageHeartRateInBeatsPerMinute + " <small>bpm</small>"]);
-  if (s.maxHeartRateInBeatsPerMinute) m.push(["Hartslag max.", s.maxHeartRateInBeatsPerMinute + " <small>bpm</small>"]);
-  if (s.averagePowerInWatts) m.push(["Vermogen gem.", s.averagePowerInWatts + " <small>W</small>"]);
-  if (s.totalElevationGainInMeters) m.push(["Hoogtemeters", Math.round(s.totalElevationGainInMeters) + " <small>m</small>"]);
-  h += '<div class="card"><div class="grid">' + m.map(([l, x]) => '<div class="met"><div class="l">' + l + '</div><div class="v">' + x + "</div></div>").join("") + "</div>" +
-    (p ? '<p class="src">Gepland: ' + esc(planRegel(p).titel) + (planRegel(p).extra ? " · " + esc(planRegel(p).extra) : "") + "</p>" : '<p class="src">Niets gepland op deze dag.</p>') + "</div>";
-  h += '<div class="card ana"><div class="ch"><h2>Eerlijke analyse</h2>' + (an ? '<span class="sm mut">' + esc(sinds(an.created_at)) + "</span>" : "") + "</div>" +
-    (an ? tekstAlinea(an.tekst) : '<p class="empty">' + (S.aiFout === "geen_sleutel" ? "De AI staat nog niet aan: de Anthropic-sleutel moet nog in Supabase gezet worden (zie Instellingen)." : "Nog geen analyse voor deze training.") + "</p>") +
-    '<button class="btn btn2" id="heranalyse" data-ref="' + esc(ref) + '">' + (an ? "Opnieuw analyseren" : "Analyse maken") + '</button><p class="msg" id="anaMsg"></p></div>';
-  h += hrGrafiek(a);
-  return h;
-}
-
-function schermBeleggen() {
-  const week = 25, maand = 90, jaar = week * 52 + maand * 12;
-  let h = kop("Beleggen", "Alleen lezen. De app plaatst nooit orders.");
-  h += alerts() + saxoKaart();
-  h += '<div class="card"><div class="ch"><h2>Je inlegplan</h2></div><div class="row"><span>Elke week</span><b>' + euro(week) + '</b></div><div class="row"><span>Elke maand extra</span><b>' + euro(maand) + '</b></div><div class="row"><span>Per maand gemiddeld</span><b>' + euro(jaar / 12) + '</b></div><div class="row"><span>Per jaar</span><b>' + euro(jaar) + '</b></div><p class="src">Berekend uit je vaste bedragen, zonder rendement.' + (S.saxo?.gekoppeld ? '' : ' Rendement en kosten komen pas als Saxo gekoppeld is.') + '</p></div>';
-  const b = S.bel;
-  h += '<div class="card"><div class="ch"><h2>Beleggersprofiel</h2>' + (b?.profiel ? '<span class="sm mut">' + esc(sinds(b.updated_at)) + "</span>" : "") + "</div>" +
-    (b?.profiel ? '<div class="big" style="text-transform:capitalize">' + esc(b.profiel) + "</div>" + (b.antwoorden?._uitleg ? '<p class="sm mut" style="margin-top:6px">' + esc(b.antwoorden._uitleg) + "</p>" : "") + '<button class="btn btn2" data-go="#vragenlijst">Vragenlijst opnieuw doen</button>'
-      : '<p class="empty">Je gaf aan dat je "alles" bent. Met 8 korte vragen bepalen we je profiel: hoe lang je belegt, hoeveel schommeling je aankan en wat je doel is.</p><button class="btn" data-go="#vragenlijst">Vragenlijst starten</button>') +
-    '<p class="src">Hulpmiddel om keuzes te kaderen, geen persoonlijk beleggingsadvies.</p></div>';
-  h += '<div class="card"><div class="ch"><h2>Later</h2></div><p class="empty">Een scanner die aandelen en ETF\'s vergelijkt met echte marktgegevens, en een controle van de Belgische taksen (TOB, roerende voorheffing). Beide komen pas met een betrouwbare databron.</p></div>';
-  return h;
-}
-
-const SAXOFOUT = { niet_ingesteld: "Saxo is nog niet ingesteld: de App Key of de App Secret ontbreekt.", verlopen: "Je Saxo-aanmelding is verlopen. Koppel opnieuw.", net: "Geen verbinding." };
-const bedrag = (x, m) => x == null ? "–" : Number(x).toLocaleString("nl-BE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (m ? " " + m : "");
-function saxoKaart() {
-  const x = S.saxo || {}, st = S.stand, d = st?.data, melding = S.saxoMelding ? '<div class="alert ' + (S.saxoMelding.ok ? "a-ok" : "a-warn") + '"><span>' + esc(S.saxoMelding.t) + "</span></div>" : "";
-  if (!x.gekoppeld) {
-    const kan = x.app_sim || x.app_live;
-    return '<div class="card"><div class="ch"><h2>Saxo Bank</h2><span class="tag t-g">Niet gekoppeld</span></div>' + melding +
-      '<p class="empty">Na het koppelen zie je hier je posities, je cash en je rendement, rechtstreeks uit je Saxo-rekening en alleen lezen. Je logt in op de pagina van Saxo zelf: je wachtwoord komt nooit in deze app. Tot dan staan hier geen koersen, want de app toont nooit verzonnen cijfers.</p>' +
-      (x.app_sim ? '<button class="btn" data-act="saxo-sim">Koppel Saxo (testomgeving)</button>' : "") +
-      (x.app_live ? '<button class="btn' + (x.app_sim ? " btn2" : "") + '" data-act="saxo-live">Koppel Saxo (echte rekening)</button>' : "") +
-      (kan ? "" : '<p class="src">Eerst moet je app bij Saxo geregistreerd zijn (App Key en App Secret).</p>') + '<p class="msg" id="saxoMsg"></p></div>';
-  }
-  let h = '<div class="card"><div class="ch"><h2>Saxo Bank</h2><span class="tag ' + (x.env === "live" ? "t-a" : "t-g") + '">' + (x.env === "live" ? "Echte rekening" : "Testomgeving") + "</span></div>" + melding;
-  if (!d) h += '<p class="empty">Gekoppeld. De eerste gegevens worden opgehaald.</p>';
-  else {
-    h += '<div class="sm mut">Totale waarde</div><div class="big">' + bedrag(d.totaal, d.munt) + "</div>" +
-      '<div class="grid" style="margin-top:12px"><div class="met"><div class="l">Cash</div><div class="v" style="font-size:18px">' + bedrag(d.cash, d.munt) + '</div></div><div class="met"><div class="l">In posities</div><div class="v" style="font-size:18px">' + bedrag(d.posities_waarde, d.munt) + "</div></div></div>";
-    const pos = d.posities || [];
-    h += '<div style="margin-top:14px">' + (pos.length ? pos.map((p) => '<div class="row"><span style="color:var(--ink);min-width:0"><b style="display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left">' + esc(p.naam) + '</b><span class="sm mut">' +
-      esc([p.aantal != null ? getal(p.aantal, p.aantal % 1 ? 2 : 0) + " stuks" : "", p.koers != null ? "koers " + bedrag(p.koers, p.munt) : ""].filter(Boolean).join(" · ")) + "</span></span><b style='white-space:nowrap;flex:none'>" + bedrag(p.waarde, d.munt) +
-      (p.winst != null ? '<span class="sm" style="display:block;font-weight:500;color:' + (p.winst >= 0 ? "var(--acc)" : "var(--warn)") + '">' + (p.winst >= 0 ? "+" : "") + bedrag(p.winst) + "</span>" : "") + "</b></div>").join("") : '<p class="empty">Geen posities.</p>') + "</div>";
-    h += '<p class="src">Uit Saxo, opgehaald ' + esc(sinds(st.opgehaald)) + ". Koersen kunnen vertraagd zijn. Elk kwartier vernieuwd." + (x.env !== "live" ? " Dit is de testomgeving met nepgeld." : "") + "</p>";
-  }
-  h += '<div class="grid" style="margin-top:4px"><button class="btn btn2" data-act="saxo-nu">Nu vernieuwen</button><button class="btn btn2" data-act="saxo-stop">Ontkoppelen</button></div><p class="msg" id="saxoMsg"></p></div>';
-  return h;
-}
-const VRAGEN = [
-  { k: "horizon", q: "Hoe lang wil je dit geld laten staan?", o: ["Minder dan 3 jaar", "3 tot 5 jaar", "5 tot 10 jaar", "Meer dan 10 jaar"] },
-  { k: "doel", q: "Wat is je belangrijkste doel?", o: ["Mijn geld vooral niet verliezen", "Een beetje meer dan op een spaarrekening", "Mijn vermogen laten groeien", "Zo veel mogelijk groei, ook met grote schommelingen"] },
-  { k: "daling", q: "Je portefeuille staat op een jaar 20% lager. Wat doe je?", o: ["Alles verkopen", "Een deel verkopen", "Niets doen en wachten", "Extra bijkopen"] },
-  { k: "verlies", q: "Welk verlies in een slecht jaar kan je aan zonder wakker te liggen?", o: ["Hoogstens 5%", "Hoogstens 10%", "Hoogstens 20%", "Meer dan 20%"] },
-  { k: "ervaring", q: "Waarin heb je al belegd?", o: ["Nog nergens in", "Fondsen of ETF's", "Losse aandelen", "Ook opties, hefboom of crypto"] },
-  { k: "buffer", q: "Heb je een noodbuffer van 3 tot 6 maanden uitgaven op een spaarrekening?", o: ["Nee", "Een deel", "Ja", "Ja, ruim meer"] },
-  { k: "inkomen", q: "Hoe zeker is je inkomen de komende jaren?", o: ["Onzeker", "Redelijk zeker", "Zeker", "Zeker en het groeit"] },
-  { k: "stijl", q: "Wat spreekt je het meest aan?", o: ["Alles gespreid in een paar brede ETF's", "Vooral ETF's, met een paar aandelen", "Half ETF's, half aandelen", "Vooral zelf aandelen kiezen"] },
-];
-const PROFIELEN = ["voorzichtig", "gematigd", "evenwichtig", "dynamisch", "zeer dynamisch"];
-function berekenProfiel(a) {
-  const score = VRAGEN.reduce((t, v) => t + (a[v.k] ?? 0), 0); // 0..24
-  let i = score <= 5 ? 0 : score <= 10 ? 1 : score <= 15 ? 2 : score <= 20 ? 3 : 4;
-  const redenen = [];
-  if ((a.horizon ?? 3) === 0) { i = Math.min(i, 1); redenen.push("je wil het geld binnen 3 jaar kunnen gebruiken"); }
-  if ((a.buffer ?? 3) === 0) { i = Math.min(i, 1); redenen.push("je hebt nog geen noodbuffer"); }
-  if ((a.daling ?? 3) === 0) { i = Math.min(i, 1); redenen.push("je zou bij een daling alles verkopen"); }
-  const uitleg = "Score " + score + " op 24." + (redenen.length ? " Begrensd omdat " + redenen.join(" en ") + "." : "");
-  return { profiel: PROFIELEN[i], uitleg };
-}
-let VL = {};
-function schermVragenlijst() {
-  if (!Object.keys(VL).length && S.bel?.antwoorden) VL = Object.fromEntries(VRAGEN.map((v) => [v.k, S.bel.antwoorden[v.k]]).filter((x) => x[1] != null));
-  let h = '<div class="top"><button class="lnk" data-go="#beleggen">‹ Beleggen</button><div class="brand">AD Omniserve</div></div><h1 style="font-size:26px">Beleggersprofiel</h1><div class="sub">8 vragen, eerlijk antwoorden</div>';
-  h += '<div class="card">' + VRAGEN.map((v, n) => '<div class="q"><h3>' + (n + 1) + ". " + esc(v.q) + "</h3>" + v.o.map((o, i) => '<button class="opt' + (VL[v.k] === i ? " on" : "") + '" data-q="' + v.k + '" data-i="' + i + '">' + esc(o) + "</button>").join("") + "</div>").join("") +
-    '<button class="btn" id="vlBewaar">Profiel berekenen</button><p class="msg" id="vlMsg"></p><p class="src">Je antwoorden staan enkel in je eigen database, apart van je sport- en gezondheidsgegevens.</p></div>';
-  return h;
-}
-
-function schermAgenda() {
-  let h = kop("Agenda", "Werk en privé, alleen lezen");
-  h += '<div class="card"><div class="ch"><h2>iCloud-agenda</h2><span class="tag t-p">Privé</span></div><p class="empty">Voor je AD Omniserve-agenda in iCloud. Koppelen gebeurt met een app-specifiek wachtwoord van Apple, niet met je gewone wachtwoord. De app leest enkel.</p><button class="btn btn2" disabled>Koppelen: volgende stap</button></div>';
-  h += '<div class="card"><div class="ch"><h2>Gmail-agenda</h2><span class="tag t-w">Werk</span></div><p class="empty">Je Google-agenda, via de officiële aanmelding van Google met enkel leesrechten.</p><button class="btn btn2" disabled>Koppelen: volgende stap</button></div>';
-  const d = vandaag(), kom = Object.keys(S.plan).filter((x) => x >= d && x <= plusDag(d, 6)).sort();
-  h += '<div class="card"><div class="ch"><h2>Trainingen deze week</h2><span class="tag t-s">Sport</span></div>' + (kom.length ? kom.map((x) => planEv(x, S.plan[x], true)).join("") : '<p class="empty">Niets gepland.</p>') + '<p class="src">Als je agenda gekoppeld is, toont de app hier ook waar een training botst met een afspraak.</p></div>';
-  return h;
-}
-
-function schermInstellingen() {
-  const t = store.get("thema", "donker"), k = S.kop || {};
-  const lg = S.gez.reduce((m, r) => (r.day > m ? r.day : m), "");
-  const ok = k.legati_link && !k.legati_fout && k.legati_ok && Date.now() - new Date(k.legati_ok).getTime() < 2 * 3600e3;
-  let h = kop("Instellingen", "Alles over jouw app") + alerts();
-  h += '<div class="card"><div class="ch"><h2>Weergave</h2></div><div class="seg" id="thema">' + [["donker", "Donker"], ["licht", "Licht"], ["systeem", "Zoals iPhone"]].map(([v, l]) => '<button data-thema="' + v + '" class="' + (t === v ? "on" : "") + '">' + l + "</button>").join("") + "</div></div>";
-  h += '<div class="card"><div class="ch"><h2>Koppelingen</h2></div>' +
-    '<div class="row"><span>Legati: trainingen</span><b style="color:' + (ok ? "var(--acc)" : "var(--warn)") + '">● ' + (ok ? "Verbonden" : k.legati_link ? "Gestopt" : "Niet ingesteld") + "</b></div>" +
-    '<div class="row"><span>Garmin (via Legati)</span><b style="color:' + (lg && lg >= plusDag(vandaag(), -2) ? "var(--acc)" : "var(--mut)") + '">' + (lg ? "laatste dag " + esc(korteDatum(lg)) : "nog niets binnen") + "</b></div>" +
-    '<div class="row"><span>Saxo Bank</span><b style="color:' + (S.saxo?.gekoppeld ? "var(--acc)" : "var(--mut)") + '">' + (S.saxo?.gekoppeld ? "● " + (S.saxo.env === "live" ? "Echte rekening" : "Testomgeving") : "Niet gekoppeld") + '</b></div><div class="row"><span>iCloud-agenda</span><b class="mut">Volgende stap</b></div><div class="row"><span>Gmail-agenda</span><b class="mut">Volgende stap</b></div>' +
-    '<p class="src">Laatste ophaling uit Legati: ' + esc(sinds(k.legati_ok)) + ". Elk kwartier. Alles alleen lezen; deze app schrijft niets terug naar Legati.</p></div>";
-  h += '<div class="card"><div class="ch"><h2>Meldingen</h2></div><div id="meld"><p class="empty"><span class="spin"></span></p></div></div>';
-  h += '<div class="card"><div class="ch"><h2>AI-assistent</h2></div><p class="empty" id="aiStat">' + (S.aiFout === "geen_sleutel" ? "Staat nog uit: zet je Anthropic-sleutel als geheim <b>ANTHROPIC_API_KEY</b> in Supabase (project AD Omniserve, Edge Functions, Secrets)." : "Beantwoordt vragen over je trainingen en herstel, en schrijft na elke nieuwe training een eerlijke analyse. Ziet geen beleggingen.") + "</p></div>";
-  h += '<div class="card"><div class="ch"><h2>Account</h2></div><div class="row"><span>Naam</span><b>' + esc(S.prof?.naam || "–") + '</b></div><div class="row"><span>E-mail</span><b style="font-weight:500;font-size:14px">' + esc(S.user?.email || "") + '</b></div>' +
-    '<button class="row" data-act="uitloggen"><span style="color:var(--warn)">Uitloggen</span><b class="mut">›</b></button></div>';
-  h += '<div class="card"><div class="ch"><h2>Privacy</h2></div><p class="empty">Dit is een app voor één persoon: niemand anders kan een account maken. Sport- en gezondheidsgegevens staan apart van je beleggersprofiel. De AI krijgt enkel sportgegevens.</p><a class="lnk" href="privacy.html" style="display:inline-block;margin-top:8px">Privacyverklaring</a></div>';
-  h += '<p class="src" style="text-align:center">AD Omniserve · versie 1</p>';
-  return h;
-}
-
-/* ================= meldingen (push) ================= */
-const PUSH_OK = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window && location.protocol !== "file:";
-const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-const STANDALONE = () => (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true;
-const u8key = (k) => { const t = k.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - (k.length % 4)) % 4), b = atob(t), o = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) o[i] = b.charCodeAt(i); return o; };
-async function fn(naam, pad, body, method) {
-  const { data: { session } } = await sb.auth.getSession();
-  let r; try { r = await fetch(CFG.url + "/functions/v1/" + naam + (pad ? "/" + pad : ""), { method: method || "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + (session ? session.access_token : ""), apikey: CFG.key }, body: method === "GET" ? undefined : JSON.stringify(body || {}) }); }
-  catch (e) { throw { code: "net" }; }
-  const j = await r.json().catch(() => ({})); if (!r.ok) throw { code: j.error || "fout" }; return j;
-}
-async function meldSub() { if (!PUSH_OK()) return null; const r = await navigator.serviceWorker.getRegistration(); return r ? await r.pushManager.getSubscription() : null; }
-async function meldR() {
-  const box = $("meld"); if (!box) return;
-  if (!PUSH_OK()) { box.innerHTML = '<p class="empty">' + (IOS && !STANDALONE() ? "Op je iPhone werken meldingen alleen vanuit het icoon op je beginscherm. Open deze pagina in Safari, tik op Deel en kies <b>Zet op beginscherm</b>. Open de app via dat icoon en kom hier terug." : "Deze browser ondersteunt geen meldingen.") + "</p>"; return; }
-  if (Notification.permission === "denied") { box.innerHTML = '<p class="empty">Meldingen zijn geweigerd. Zet ze aan via Instellingen, Meldingen, AD Omniserve op je iPhone.</p>'; return; }
-  const sub = await meldSub().catch(() => null);
-  box.innerHTML = '<p class="empty">Je krijgt enkel een melding als er een nieuwe training binnen is, met de analyse erbij. Verder niets.</p>' +
-    (sub ? '<div class="row" style="margin-top:8px"><span>Op dit toestel</span><b style="color:var(--acc)">Aan</b></div><div class="grid" style="margin-top:6px"><button class="btn btn2" data-act="mtest">Testmelding</button><button class="btn btn2" data-act="muit">Uitzetten</button></div>'
-      : '<button class="btn" data-act="maan">Meldingen aanzetten</button>') + '<p class="msg" id="mmsg"></p>';
-}
-async function meldActie(act, knop) {
-  const msg = (x) => { const m = $("mmsg"); if (m) m.textContent = x; };
-  knop.disabled = true;
-  try {
-    if (act === "maan") {
-      const perm = await Notification.requestPermission(); if (perm !== "granted") { await meldR(); return; }
-      const reg = await navigator.serviceWorker.register("sw.js"); await navigator.serviceWorker.ready;
-      const { key } = await fn("push", "key", null, "GET");
-      let sub = await reg.pushManager.getSubscription(); if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: u8key(key) });
-      const j = sub.toJSON(); await fn("push", "subscribe", { endpoint: j.endpoint, keys: j.keys, ua: IOS ? "iPhone" : "Browser" });
-      await meldR(); msg("Meldingen staan aan.");
-    } else if (act === "mtest") { const j = await fn("push", "test"); msg(j.sent ? "Testmelding verstuurd." : "Er kon geen melding verstuurd worden."); knop.disabled = false; }
-    else if (act === "muit") { const sub = await meldSub(); if (sub) { await fn("push", "unsubscribe", { endpoint: sub.endpoint }).catch(() => {}); await sub.unsubscribe(); } await meldR(); }
-  } catch (e) { console.error(e); knop.disabled = false; msg(e && e.code === "net" ? "Geen verbinding." : "Dat lukte niet. Probeer opnieuw."); }
-}
-
-/* ================= assistent ================= */
-let CHAT = (() => { try { return JSON.parse(sessionStorage.getItem("omni.chat") || "[]"); } catch (e) { return []; } })();
-const bewaarChat = () => { try { sessionStorage.setItem("omni.chat", JSON.stringify(CHAT.slice(-30))); } catch (e) { /* */ } };
-const AIFOUT = { geen_sleutel: "De AI staat nog niet aan: de Anthropic-sleutel moet nog in Supabase gezet worden (zie Instellingen).", druk: "De AI is even druk. Probeer het zo meteen opnieuw.", limiet: "Je hebt het maximum aantal vragen voor vandaag bereikt.", net: "Geen verbinding. Controleer je internet.", geweigerd: "Daar kan de assistent niet op antwoorden." };
-function openChat(vraag) {
-  const el = $("sheet");
-  el.innerHTML = '<div class="sheet" role="dialog" aria-label="Assistent"><header><button class="lnk" data-act="chatdicht">Sluiten</button><b>Assistent</b><button class="lnk" data-act="chatleeg">Wissen</button></header><div class="msgs" id="msgs"></div><footer><form class="ask" id="chatForm"><input id="chatQ" placeholder="Stel je vraag…" autocomplete="off" enterkeyhint="send"><button aria-label="Verstuur">↑</button></form></footer></div>';
-  document.body.style.overflow = "hidden";
-  tekenChat();
-  if (vraag) stuurChat(vraag); else setTimeout(() => $("chatQ")?.focus(), 50);
-}
-function sluitChat() { $("sheet").innerHTML = ""; document.body.style.overflow = ""; }
-function tekenChat(bezig) {
-  const box = $("msgs"); if (!box) return;
-  box.innerHTML = (CHAT.length ? "" : '<div class="bub a">Hoi! Ik ken je Legati-schema, je Garmin-trainingen en je herstel van de laatste weken. Vraag maar raak. Beleggingen en agenda zie ik nog niet.</div>') +
-    CHAT.map((m) => '<div class="bub ' + (m.role === "user" ? "u" : m.err ? "e" : "a") + '">' + esc(m.content) + "</div>").join("") + (bezig ? '<div class="bub a"><span class="spin"></span></div>' : "");
-  box.scrollTop = box.scrollHeight;
-}
-async function stuurChat(q) {
-  q = String(q || "").trim().slice(0, 2000); if (!q) return;
-  CHAT.push({ role: "user", content: q }); tekenChat(true);
-  try {
-    const msgs = CHAT.filter((m) => !m.err).map((m) => ({ role: m.role, content: m.content }));
-    while (msgs.length && msgs[0].role !== "user") msgs.shift();
-    const j = await fn("ai", "", { kind: "chat", messages: msgs });
-    CHAT.push({ role: "assistant", content: j.text || "(geen antwoord)" }); S.aiFout = null;
-  } catch (e) { const c = e && e.code; if (c === "geen_sleutel") S.aiFout = c; CHAT.push({ role: "assistant", err: true, content: AIFOUT[c] || "Er ging iets mis. Probeer opnieuw." }); }
-  bewaarChat(); tekenChat();
-}
-
-/* ================= router ================= */
-const TABS = [["home", "Home", '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/>'], ["sport", "Sport", '<circle cx="14" cy="4.5" r="2"/><path d="M7 21l3-6 3 2v5M10 15l1-5 4 2 3 1M8 10l3-1"/>'],
-  ["beleggen", "Beleggen", '<path d="M4 19V5M4 19h16"/><path d="m7 15 4-4 3 3 5-6"/>'], ["agenda", "Agenda", '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'],
-  ["instellingen", "Instellingen", '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>']];
-function teken() {
-  if (!S.geladen) return;
-  const h = (location.hash || "#home").slice(1).split("?")[0], [r, arg] = h.split("/");
-  const tab = { vragenlijst: "beleggen" }[r] || (TABS.some((t) => t[0] === r) ? r : "home");
-  const html = r === "sport" && arg ? schermTraining(decodeURIComponent(arg)) : r === "sport" ? schermSport() : r === "beleggen" ? schermBeleggen() : r === "vragenlijst" ? schermVragenlijst()
-    : r === "agenda" ? schermAgenda() : r === "instellingen" ? schermInstellingen() : schermHome();
-  $("app").innerHTML = html;
-  const tb = $("tabbar"); tb.classList.remove("hide");
-  tb.innerHTML = TABS.map(([id, l, ic]) => '<a href="#' + id + '" class="' + (id === tab ? "on" : "") + '"' + (id === tab ? ' aria-current="page"' : "") + '><svg viewBox="0 0 24 24">' + ic + "</svg>" + l + "</a>").join("");
-  if (r === "instellingen") meldR();
-}
-let vorigeHash = "";
-window.addEventListener("hashchange", () => { const h = location.hash; teken(); if (h.split("/")[0] !== vorigeHash.split("/")[0] || h.includes("/")) window.scrollTo(0, 0); vorigeHash = h; });
-
-/* ================= klikken ================= */
-document.addEventListener("click", async (e) => {
-  const t = e.target.closest("[data-go],[data-dag],[data-week],[data-thema],[data-vraag],[data-q],[data-act],#heranalyse,#vlBewaar");
-  if (!t) return;
-  if (t.dataset.go) { location.hash = t.dataset.go; return; }
-  if (t.dataset.dag) { SPORTDAG = t.dataset.dag; teken(); return; }
-  if (t.dataset.week) { SPORTDAG = plusDag(SPORTDAG || vandaag(), Number(t.dataset.week)); teken(); return; }
-  if (t.dataset.thema) { store.set("thema", t.dataset.thema); zetThema(); teken(); return; }
-  if (t.dataset.vraag) { openChat(t.dataset.vraag); return; }
-  if (t.dataset.q) { VL[t.dataset.q] = Number(t.dataset.i); t.parentElement.querySelectorAll(".opt").forEach((b) => b.classList.toggle("on", b === t)); return; }
-  const act = t.dataset.act;
-  if (act === "chatdicht") return sluitChat();
-  if (act === "chatleeg") { CHAT = []; bewaarChat(); tekenChat(); return; }
-  if (act === "uitloggen") { await sb.auth.signOut(); location.hash = ""; location.reload(); return; }
-  if (act === "maan" || act === "mtest" || act === "muit") return meldActie(act, t);
-  if (act && act.startsWith("saxo-")) {
-    const m = $("saxoMsg"), zeg = (x) => { if (m) m.textContent = x; }; t.disabled = true;
-    try {
-      if (act === "saxo-sim" || act === "saxo-live") { zeg("Je gaat naar Saxo om in te loggen…"); const j = await fn("saxo", "start", { env: act === "saxo-live" ? "live" : "sim" }); location.href = j.url; return; }
-      if (act === "saxo-stop") { if (!confirm("Saxo ontkoppelen? Je gegevens uit Saxo worden uit de app verwijderd.")) { t.disabled = false; return; } await fn("saxo", "stop"); }
-      if (act === "saxo-nu") { zeg("Bezig…"); const j = await fn("saxo", "nu"); if (j.error) throw { code: j.error }; }
-      S.saxoMelding = null; await laad(); teken();
-    } catch (err) { zeg(SAXOFOUT[err && err.code] || "Dat lukte niet (" + ((err && err.code) || "fout") + ")."); t.disabled = false; }
-    return;
-  }
-
-  if (t.id === "heranalyse") {
-    const m = $("anaMsg"); t.disabled = true; m.innerHTML = '<span class="spin"></span> De analyse wordt geschreven…';
-    try { const j = await fn("ai", "", { kind: "analyse", ref: t.dataset.ref }); S.ana[t.dataset.ref] = { ref: t.dataset.ref, tekst: j.text, created_at: new Date().toISOString() }; S.aiFout = null; teken(); }
-    catch (err) { const c = err && err.code; if (c === "geen_sleutel") S.aiFout = c; m.textContent = AIFOUT[c] || "Dat lukte niet. Probeer opnieuw."; t.disabled = false; }
-    return;
-  }
-  if (t.id === "vlBewaar") {
-    const m = $("vlMsg"), mist = VRAGEN.filter((v) => VL[v.k] == null);
-    if (mist.length) { m.textContent = "Beantwoord nog " + (mist.length === 1 ? "vraag " : "de vragen ") + mist.map((v) => VRAGEN.indexOf(v) + 1).join(", ") + "."; return; }
-    const r = berekenProfiel(VL); t.disabled = true;
-    const { error } = await sb.from("belegger").upsert({ user_id: S.user.id, antwoorden: { ...VL, _uitleg: r.uitleg }, profiel: r.profiel, updated_at: new Date().toISOString() });
-    if (error) { m.textContent = "Bewaren lukte niet. Probeer opnieuw."; t.disabled = false; return; }
-    S.bel = { antwoorden: { ...VL, _uitleg: r.uitleg }, profiel: r.profiel, updated_at: new Date().toISOString() }; VL = {}; location.hash = "#beleggen";
-  }
-});
-document.addEventListener("submit", (e) => {
-  if (e.target.id === "homeAsk") { e.preventDefault(); const q = $("homeQ").value; if (q.trim()) openChat(q); }
-  if (e.target.id === "chatForm") { e.preventDefault(); const i = $("chatQ"); const q = i.value; i.value = ""; stuurChat(q); }
-});
-
-/* ================= inloggen ================= */
-let AUM = "in";
-function schermLogin(melding) {
-  $("tabbar").classList.add("hide");
-  $("app").innerHTML = '<div class="login"><div class="logo">AD</div><h1>AD Omniserve</h1><p class="sub">Je persoonlijke app voor sport, beleggen en agenda.</p><div class="card"><div class="seg" style="margin-bottom:6px"><button data-aum="in" class="' + (AUM === "in" ? "on" : "") + '">Inloggen</button><button data-aum="reg" class="' + (AUM === "reg" ? "on" : "") + '">Account maken</button></div>' +
-    '<form id="auForm">' + (AUM === "reg" ? '<label class="field"><span>Naam</span><input id="auNaam" autocomplete="name" required maxlength="40"></label>' : "") +
-    '<label class="field"><span>E-mail</span><input id="auMail" type="email" autocomplete="email" required></label><label class="field"><span>Wachtwoord</span><input id="auPw" type="password" autocomplete="' + (AUM === "reg" ? "new-password" : "current-password") + '" required minlength="8"></label>' +
-    '<button class="btn" id="auGo">' + (AUM === "reg" ? "Account maken" : "Inloggen") + "</button></form>" + (AUM === "in" ? '<button class="lnk" id="auVergeten" style="margin-top:12px">Wachtwoord vergeten?</button>' : '<p class="src">Enkel het allereerste account kan aangemaakt worden. Daarna is de app op slot.</p>') +
-    '<p class="msg" id="auMsg">' + esc(melding || "") + "</p></div></div>";
-}
-document.addEventListener("click", (e) => { const b = e.target.closest("[data-aum]"); if (b) { AUM = b.dataset.aum; schermLogin(); } });
-document.addEventListener("click", async (e) => {
-  if (!e.target.closest("#auVergeten")) return;
-  const mail = $("auMail").value.trim(); if (!mail) { $("auMsg").textContent = "Vul eerst je e-mailadres in."; return; }
-  await sb.auth.resetPasswordForEmail(mail, { redirectTo: location.origin + location.pathname });
-  $("auMsg").textContent = "Als dit adres bekend is, kreeg je een mail om een nieuw wachtwoord te kiezen.";
-});
-document.addEventListener("submit", async (e) => {
-  if (e.target.id !== "auForm") return; e.preventDefault();
-  const go = $("auGo"), msg = $("auMsg"), mail = $("auMail").value.trim(), pw = $("auPw").value;
-  go.disabled = true; msg.textContent = "";
-  try {
-    if (AUM === "reg") {
-      const r = await sb.auth.signUp({ email: mail, password: pw, options: { data: { naam: $("auNaam").value.trim().slice(0, 40), akkoord: "true" }, emailRedirectTo: location.origin + location.pathname } });
-      if (r.error) throw r.error;
-      if (!r.data.session) { AUM = "in"; schermLogin("Gelukt. Bevestig je e-mailadres via de mail die je kreeg, en log dan in."); return; }
-    } else { const r = await sb.auth.signInWithPassword({ email: mail, password: pw }); if (r.error) throw r.error; }
-  } catch (err) {
-    const t = String(err?.message || "");
-    msg.textContent = /persoonlijke app|Database error/i.test(t) ? "Dit is een persoonlijke app: er bestaat al een account." : /Invalid login/i.test(t) ? "E-mail of wachtwoord klopt niet." : /confirm/i.test(t) ? "Bevestig eerst je e-mailadres via de mail die je kreeg." : "Dat lukte niet: " + t;
-    go.disabled = false;
-  }
-});
-async function nieuwWachtwoord() {
-  $("tabbar").classList.add("hide");
-  $("app").innerHTML = '<div class="login"><div class="logo">AD</div><h1>Nieuw wachtwoord</h1><div class="card"><form id="pwForm"><label class="field"><span>Nieuw wachtwoord</span><input id="pwNieuw" type="password" minlength="8" required autocomplete="new-password"></label><button class="btn">Bewaren</button></form><p class="msg" id="pwMsg"></p></div></div>';
-  $("pwForm").addEventListener("submit", async (e) => { e.preventDefault(); const { error } = await sb.auth.updateUser({ password: $("pwNieuw").value }); if (error) $("pwMsg").textContent = "Dat lukte niet: " + error.message; else { $("pwMsg").textContent = "Bewaard."; setTimeout(() => location.replace(location.pathname), 800); } });
-}
-
-/* ================= start ================= */
-let BEZIG = false;
-async function start(session) {
-  if (!session) { S = { ...S, user: null, geladen: false }; schermLogin(); return; }
-  if (BEZIG || (S.user && S.user.id === session.user.id && S.geladen)) return;
-  BEZIG = true; S.user = session.user;
-  const sq = new URLSearchParams(location.hash.split("?")[1] || "");
-  if (sq.get("saxo")) { const v = sq.get("saxo"); S.saxoMelding = { ok: v === "ok", t: { ok: "Saxo is gekoppeld.", deels: "Saxo is gekoppeld, maar de gegevens konden nog niet opgehaald worden. Probeer Nu vernieuwen.", verlopen: "Het koppelen duurde te lang. Probeer opnieuw.", fout: "Het koppelen met Saxo lukte niet. Probeer opnieuw." }[v] || "Saxo: " + v }; history.replaceState(null, "", location.pathname + "#beleggen"); }
-  try { await laad(); teken(); }
-  catch (e) { console.error(e); $("app").innerHTML = '<div class="login"><div class="card"><p>De gegevens konden niet geladen worden. Controleer je verbinding.</p><button class="btn" onclick="location.reload()">Opnieuw</button></div></div>'; }
-  BEZIG = false;
-}
-async function ververs() { if (!S.user || !S.geladen) return; const f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName)) return; try { await laad(); if (!$("sheet").innerHTML) teken(); } catch (e) { /* stil */ } }
-if (!sb) { $("app").innerHTML = '<div class="login"><div class="card"><p>De app is nog niet ingesteld (config.js).</p></div></div>'; }
-else {
-  sb.auth.onAuthStateChange((ev, session) => { if (ev === "PASSWORD_RECOVERY") { nieuwWachtwoord(); return; } if (ev === "SIGNED_OUT") { start(null); return; } if (ev === "INITIAL_SESSION" || ev === "SIGNED_IN") setTimeout(() => start(session), 0); });
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") ververs(); });
-  setInterval(ververs, 5 * 60e3);
-}
-if (PUSH_OK()) {
-  navigator.serviceWorker.register("sw.js").catch(() => {});
-  navigator.serviceWorker.addEventListener("message", (e) => { const d = e.data || {}; if (d.type === "td-nav" && d.url) { try { location.hash = new URL(d.url).hash || "#home"; } catch (x) { /* */ } } if (d.type === "td-refresh") ververs(); });
-}
-</script>
+<script src="js/reken.js?v=2"></script>
+<script src="js/basis.js?v=2"></script>
+<script src="js/kaarten.js?v=2"></script>
+<script src="js/agenda.js?v=2"></script>
+<script src="js/taken.js?v=2"></script>
+<script src="js/werk.js?v=2"></script>
+<script src="js/vandaag.js?v=2"></script>
+<script src="js/sport.js?v=2"></script>
+<script src="js/beleggen.js?v=2"></script>
+<script src="js/week.js?v=2"></script>
+<script src="js/instellingen.js?v=2"></script>
+<script src="js/start.js?v=2"></script>
 </body>
 </html>

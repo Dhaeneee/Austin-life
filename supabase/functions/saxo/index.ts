@@ -3,7 +3,8 @@
 //   GET  /saxo/callback (Saxo)             -> code inruilen, token versleuteld bewaren, eerste stand ophalen
 //   POST /saxo/nu       (ingelogd)         -> stand nu vernieuwen
 //   POST /saxo/stop     (ingelogd)         -> koppeling verwijderen
-//   POST /saxo/cron     (pg_cron)          -> elk kwartier token vernieuwen en stand ophalen
+//   POST /saxo/cron     (pg_cron)          -> elk kwartier token vernieuwen en stand ophalen; dagstand bewaren;
+//                                             boekingen (stortingen, opnames, kosten, dividenden) twee keer per dag
 // Veiligheid:
 //   - Je Saxo-wachtwoord komt nooit in deze app: je logt in op de pagina van Saxo zelf.
 //   - Deze functie doet enkel GET-verzoeken naar een vaste lijst leesadressen (LEES). Er is geen code om orders te plaatsen.
@@ -11,6 +12,7 @@
 // Deploy zonder JWT-controle.
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { boekingRij } from "./boeking.ts";
 
 const SITE = Deno.env.get("SITE_URL") ?? "https://dhaeneee.github.io/Austin-life/";
 const SELF = (Deno.env.get("SUPABASE_URL") ?? "") + "/functions/v1/saxo/callback";
@@ -23,7 +25,12 @@ type Env = keyof typeof ENV;
 const LEES = {
   balans: "/port/v1/balances/me",
   posities: "/port/v1/netpositions/me?FieldGroups=NetPositionBase,NetPositionView,DisplayAndFormat&$top=200",
+  klant: "/port/v1/clients/me",
+  // historische boekingen (stortingen, opnames, dividenden, kosten); ClientKey en datums worden ingevuld
+  boekingen: (clientKey: string, van: string, tot: string) => `/cs/v1/reports/bookings/${encodeURIComponent(clientKey)}?FromDate=${van}&ToDate=${tot}&$top=1000`,
 } as const;
+const BOEKINGEN_VANAF = "2010-01-01"; // zo ver terug dat de volledige historiek van een gewone rekening meekomt
+
 
 function sbKey(): string {
   try { const j = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}"); if (j && typeof j.default === "string" && j.default) return j.default; } catch { /* oud */ }
@@ -77,6 +84,7 @@ async function bewaar(uid: string, env: Env, t: { refresh_token: string; refresh
 
 // ---------- lezen (enkel GET) ----------
 async function lees(env: Env, access: string, pad: string) {
+  if (!pad.startsWith("/port/v1/") && !pad.startsWith("/cs/v1/reports/bookings/")) throw new Error("adres_niet_toegelaten");
   const r = await fetch(ENV[env].api + pad, { method: "GET", headers: { Authorization: "Bearer " + access, Accept: "application/json" } });
   if (!r.ok) { console.error("saxo lees", pad.split("?")[0], r.status); throw new Error("lezen_" + r.status); }
   return await r.json();
@@ -106,13 +114,47 @@ async function vernieuw(uid: string) {
     const t = await token(env, { grant_type: "refresh_token", refresh_token: await ontsleutel(l.refresh_enc) });
     await bewaar(uid, env, t);
     const [bal, pos] = await Promise.all([lees(env, t.access_token, LEES.balans), lees(env, t.access_token, LEES.posities)]);
-    await db.from("saxo_stand").upsert({ user_id: uid, env, data: stand(bal, pos), opgehaald: new Date().toISOString() });
+    const st = stand(bal, pos);
+    await db.from("saxo_stand").upsert({ user_id: uid, env, data: st, opgehaald: new Date().toISOString() });
+    await db.from("saxo_historie").upsert({ user_id: uid, env, dag: dagBrussel(), totaal: st.totaal, cash: st.cash, munt: st.munt });
     await db.from("saxo_link").update({ last_ok: new Date().toISOString(), last_error: null }).eq("user_id", uid);
+    await boekingen(uid, env, t.access_token, false);
     return { ok: true };
   } catch (e) {
     const c = String((e as Error).message ?? e);
     await db.from("saxo_link").update(c === "verlopen" ? { last_error: c, refresh_enc: null } : { last_error: c }).eq("user_id", uid);
     return { error: c };
+  }
+}
+
+const dagBrussel = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Brussels" }).format(new Date());
+// boekingen hoogstens één keer per 12 uur ophalen (of nu, op vraag); een fout hier stopt de rest niet
+async function boekingen(uid: string, env: Env, access: string, nu: boolean) {
+  const { data: l } = await db.from("saxo_link").select("boekingen_ok").eq("user_id", uid).maybeSingle();
+  if (!nu && l?.boekingen_ok && Date.now() - new Date(l.boekingen_ok).getTime() < 12 * 3600e3) return;
+  try {
+    const klant = await lees(env, access, LEES.klant);
+    const ck = String(klant?.ClientKey ?? "");
+    if (!ck) throw new Error("geen_clientkey");
+    let pad: string | null = LEES.boekingen(ck, BOEKINGEN_VANAF, dagBrussel()), n = 0;
+    const rijen: any[] = [];
+    while (pad && n++ < 20) {
+      const j = await lees(env, access, pad);
+      for (const b of Array.isArray(j?.Data) ? j.Data : []) if (b?.BkAmountId != null) rijen.push(boekingRij(uid, env, b));
+      const vol = typeof j?.__next === "string" ? j.__next : "";
+      const i = vol.indexOf("/cs/v1/reports/bookings/");
+      pad = i >= 0 ? vol.slice(i) : null;
+    }
+    if (pad) throw new Error("te_veel_boekingen");
+    for (let i = 0; i < rijen.length; i += 500) {
+      const { error } = await db.from("saxo_boekingen").upsert(rijen.slice(i, i + 500));
+      if (error) throw new Error("opslaan");
+    }
+    await db.from("saxo_link").update({ boekingen_ok: new Date().toISOString(), boekingen_fout: null, boekingen_van: BOEKINGEN_VANAF }).eq("user_id", uid);
+  } catch (e) {
+    const c = String((e as Error).message ?? e).slice(0, 60);
+    console.error("saxo boekingen", c);
+    await db.from("saxo_link").update({ boekingen_fout: c }).eq("user_id", uid);
   }
 }
 
@@ -163,6 +205,7 @@ if (typeof Deno !== "undefined" && Deno.serve) Deno.serve(async (req) => {
     if (pad === "stop") {
       await db.from("saxo_link").delete().eq("user_id", user.id);
       await db.from("saxo_stand").delete().eq("user_id", user.id);
+      // dagstanden en boekingen blijven bewaard als je eigen historiek
       return json({ ok: true });
     }
     return json({ error: "onbekend" }, 404);

@@ -6,7 +6,7 @@ self.addEventListener("push", e => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : "" }; }
   e.waitUntil((async () => {
-    await self.registration.showNotification(d.title || "AD Omniserve", {
+    await self.registration.showNotification(d.title || "Austin Life", {
       body: d.body || "", icon: "icon-192.png?v=omni1", badge: "badge-96.png", tag: d.tag || undefined,
       data: { url: d.url || "#home" },
     });

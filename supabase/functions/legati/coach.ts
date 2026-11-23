@@ -7,7 +7,7 @@ const SPORT: Record<string, string> = {
   RUNNING: "lopen", TRAIL_RUNNING: "traillopen", TREADMILL_RUNNING: "lopen (loopband)", CYCLING: "fietsen", ROAD_BIKING: "fietsen",
   INDOOR_CYCLING: "fietsen (binnen)", VIRTUAL_RIDE: "fietsen (virtueel)", MOUNTAIN_BIKING: "mountainbike", GRAVEL_CYCLING: "gravel",
   LAP_SWIMMING: "zwemmen (bad)", OPEN_WATER_SWIMMING: "zwemmen (open water)", SWIMMING: "zwemmen", STRENGTH_TRAINING: "kracht",
-  HIKING: "wandelen", WALKING: "wandelen", SQUASH: "squash", MULTI_SPORT: "multisport",
+  HIKING: "wandelen", WALKING: "wandelen", SQUASH: "squash", PADEL: "padel", PADDLE_TENNIS: "padel", PADDELBALL: "padel", MULTI_SPORT: "multisport",
 };
 export const sportNaam = (t: string) => SPORT[String(t ?? "").toUpperCase()] ?? String(t ?? "andere").toLowerCase().replace(/_/g, " ");
 
