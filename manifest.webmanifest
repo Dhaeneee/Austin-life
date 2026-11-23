@@ -1,7 +1,7 @@
 {
-  "name": "AD Omniserve",
-  "short_name": "AD Omniserve",
-  "description": "Persoonlijke app van Austin: sport, beleggen en agenda",
+  "name": "Austin Life",
+  "short_name": "Austin Life",
+  "description": "Persoonlijke cockpit: vandaag, taken, agenda, werk, sport en beleggen",
   "lang": "nl",
   "start_url": "./",
   "scope": "./",

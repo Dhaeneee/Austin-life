@@ -44,10 +44,13 @@ Deno.serve(async (req) => {
       const { data: use } = await admin.from("ai_usage").select("n").eq("user_id", user.id).eq("dag", dag).maybeSingle();
       if ((use?.n ?? 0) >= DAILY_LIMIT) return json({ error: "limiet" }, 429);
       const iso = (n: number) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10);
-      const [{ data: acts }, { data: gez }, { data: pl }] = await Promise.all([
+      const [{ data: acts }, { data: gez }, { data: pl }, { data: eigen }, { data: gevoel }] = await Promise.all([
         admin.from("garmin_data").select("ref, day, data").eq("user_id", user.id).eq("kind", "activity").gte("day", iso(-30)).order("day", { ascending: false }),
         admin.from("garmin_data").select("kind, day, data").eq("user_id", user.id).neq("kind", "activity").gte("day", iso(-14)),
         admin.from("plans").select("cplan, cnote").eq("athlete_id", user.id).maybeSingle(),
+        // enkel sportgegevens die je zelf invoerde; werk- en beleggingsgegevens gaan nooit naar de AI
+        admin.from("sport_invoer").select("dag, sport, duur_min, intensiteit, notitie").eq("user_id", user.id).gte("dag", iso(-30)).order("dag"),
+        admin.from("gevoel").select("dag, energie, vermoeidheid, klachten").eq("user_id", user.id).gte("dag", iso(-14)).order("dag"),
       ]);
       const cplan = pl?.cplan ?? {};
       try {
@@ -69,10 +72,12 @@ Deno.serve(async (req) => {
         const plan: Record<string, unknown> = {};
         for (const d of Object.keys(cplan).sort()) if (d >= iso(-14) && d <= iso(21)) plan[d] = cplan[d];
         const ctx = `Vandaag is het ${dag}.
-Wat je weet (enkel sport en gezondheid; beleggingen en agenda zijn nog niet gekoppeld, zeg dat eerlijk als ernaar gevraagd wordt):
+Wat je weet (enkel sport en gezondheid; werk, agenda en beleggingen krijg je bewust niet, zeg dat eerlijk als ernaar gevraagd wordt). Maak altijd duidelijk wat gemeten is en wat zijn eigen invoer is, en trek geen medische conclusies:
 Trainingsschema uit Legati (vorige 2 weken en komende 3 weken): ${JSON.stringify(plan)}
 Garmin-trainingen laatste 30 dagen: ${JSON.stringify((acts ?? []).slice(0, 25).map((a) => ({ dag: a.day, ...feiten(a.data) })).map((f: Record<string, unknown>) => { delete f.hartslag_per_kwart; delete f.ronden; return f; }))}
-Gezondheid laatste 14 dagen: ${JSON.stringify(gezondheid(gez ?? []))}`;
+Gezondheid laatste 14 dagen (gemeten door Garmin): ${JSON.stringify(gezondheid(gez ?? []))}
+Zelf ingevoerde trainingen (bv. padel, eigen invoer, niet gemeten; intensiteit = ervaren inspanning 1-10): ${JSON.stringify(eigen ?? [])}
+Dagelijkse gevoelscheck (eigen invoer; energie en vermoeidheid op 1-5): ${JSON.stringify(gevoel ?? [])}`;
         const tekst = await vraag(SYSTEEM + "\nJe bent ook zijn algemene assistent in de app. Beantwoord vragen kort. Je kunt niets wijzigen in de app of in Legati; trainingen plant hij zelf in Legati. Je geeft nooit beleggingsorders en geen persoonlijk beleggingsadvies als feit.\n\n" + ctx, msgs, 1500);
         return json({ text: tekst });
       } catch (e) {

@@ -1,0 +1,11 @@
+{
+  "name": "omni-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ics": "node --experimental-strip-types ics.test.mjs",
+    "reken": "node --experimental-strip-types reken.test.mjs",
+    "app": "node app.test.mjs"
+  },
+  "dependencies": { "ical.js": "2.1.0", "pg": "8.13.1" }
+}
